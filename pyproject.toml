@@ -1,0 +1,46 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pdf-tool"
+version = "0.1.0"
+description = "PDF 조작 도구 (Cut, Merge, Split, Rotate, Resize, Compress, Watermark, Info)"
+requires-python = ">=3.13"
+dependencies = [
+    "pypdf>=6.8.0",
+    "typer>=0.24.1",
+    "rich>=13.0.0",
+    "reportlab>=4.4.10",
+    "Pillow>=12.1.1",
+]
+
+[project.scripts]
+pdf-tool = "pdf_tool.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pdf_tool"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py313"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["N802"]  # 테스트에서 한글 함수명 허용
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 99
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.9.0",
+]
