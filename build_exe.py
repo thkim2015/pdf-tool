@@ -42,17 +42,17 @@ def build():
         str(root / "pdf_tool_entry.py"),
     ]
 
-    print("빌드 시작...")
-    print(f"명령어: {' '.join(cmd)}")
+    print("Build starting...")
+    print(f"Command: {' '.join(cmd)}")
     result = subprocess.run(cmd, cwd=str(root))
 
     if result.returncode == 0:
         exe_ext = ".exe" if sys.platform == "win32" else ""
         exe_path = root / "dist" / f"pdf-tool{exe_ext}"
-        print(f"\n빌드 완료: {exe_path}")
-        print(f"파일 크기: {exe_path.stat().st_size / 1024 / 1024:.1f} MB")
+        print(f"\nBuild complete: {exe_path}")
+        print(f"File size: {exe_path.stat().st_size / 1024 / 1024:.1f} MB")
     else:
-        print("\n빌드 실패!", file=sys.stderr)
+        print("\nBuild failed!", file=sys.stderr)
         sys.exit(1)
 
 
