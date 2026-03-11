@@ -17,6 +17,7 @@ dependencies = [
 
 [project.scripts]
 pdf-tool = "pdf_tool.cli:app"
+pdf-tool-gui = "pdf_tool.gui.app:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/pdf_tool"]
@@ -39,6 +40,10 @@ select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM"]
 max-line-length = 99
 
 [project.optional-dependencies]
+gui = [
+    "customtkinter>=5.2.0",
+    "tkinterdnd2>=0.4.2",
+]
 dev = [
     "pytest>=8.0.0",
     "pytest-cov>=6.0.0",

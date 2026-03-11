@@ -1,0 +1,244 @@
+"""PDF Tool GUI 메인 애플리케이션.
+
+CustomTkinter 기반의 PDF 도구 GUI 진입점이다.
+"""
+
+from __future__ import annotations
+
+from pdf_tool.core.exceptions import PDFToolError
+
+# 사이드바 네비게이션 버튼 목록
+NAV_BUTTONS = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Info"]
+
+
+class PageManager:
+    """페이지 전환을 관리하는 클래스.
+
+    pack_forget()/pack() 패턴으로 페이지를 전환한다.
+    """
+
+    def __init__(self) -> None:
+        self.pages: dict[str, object] = {}
+        self.current_page: str | None = None
+
+    def register(self, name: str, page: object) -> None:
+        """페이지를 이름으로 등록한다.
+
+        Args:
+            name: 페이지 이름
+            page: 페이지 위젯 인스턴스
+        """
+        self.pages[name] = page
+
+    def switch_to(self, name: str) -> None:
+        """지정된 페이지로 전환한다.
+
+        Args:
+            name: 전환할 페이지 이름
+        """
+        if name not in self.pages:
+            return
+
+        # 현재 페이지 숨기기
+        if self.current_page and self.current_page in self.pages:
+            self.pages[self.current_page].pack_forget()
+
+        # 새 페이지 표시
+        self.pages[name].pack(fill="both", expand=True)
+        self.current_page = name
+
+
+def format_exception_message(exc: Exception) -> str:
+    """예외를 사용자 친화적 메시지로 변환한다.
+
+    Args:
+        exc: 발생한 예외
+
+    Returns:
+        사용자에게 표시할 에러 메시지
+    """
+    msg = str(exc)
+    if not msg:
+        return f"알 수 없는 오류가 발생했습니다: {type(exc).__name__}"
+    if isinstance(exc, PDFToolError):
+        return f"PDF 오류: {msg}"
+    return msg
+
+
+def should_confirm_close(is_executing: bool) -> bool:
+    """윈도우 닫기 시 확인이 필요한지 결정한다.
+
+    Args:
+        is_executing: 현재 작업이 실행 중인지 여부
+
+    Returns:
+        확인이 필요하면 True
+    """
+    return is_executing
+
+
+def _create_app():
+    """PDFToolApp 인스턴스를 생성한다. (지연 임포트)"""
+    import sys
+    import tkinter.messagebox as mb
+
+    import customtkinter as ctk
+
+    from pdf_tool.gui.pages.compress_page_widget import CompressPageWidget
+    from pdf_tool.gui.pages.cut_page_widget import CutPageWidget
+    from pdf_tool.gui.pages.info_page_widget import InfoPageWidget
+    from pdf_tool.gui.pages.merge_page_widget import MergePageWidget
+    from pdf_tool.gui.pages.resize_page_widget import ResizePageWidget
+    from pdf_tool.gui.pages.rotate_page_widget import RotatePageWidget
+    from pdf_tool.gui.pages.split_page_widget import SplitPageWidget
+    from pdf_tool.gui.pages.watermark_page_widget import WatermarkPageWidget
+    from pdf_tool.gui.theme import DARK_MODE, apply_theme, toggle_theme
+
+    # 페이지 이름과 위젯 클래스 매핑
+    PAGE_CLASSES = {
+        "Cut": CutPageWidget,
+        "Merge": MergePageWidget,
+        "Split": SplitPageWidget,
+        "Rotate": RotatePageWidget,
+        "Resize": ResizePageWidget,
+        "Compress": CompressPageWidget,
+        "Watermark": WatermarkPageWidget,
+        "Info": InfoPageWidget,
+    }
+
+    class PDFToolApp(ctk.CTk):
+        """PDF Tool GUI 메인 윈도우 클래스."""
+
+        # 윈도우 기본 크기
+        WINDOW_WIDTH = 900
+        WINDOW_HEIGHT = 650
+        SIDEBAR_WIDTH = 180
+
+        def __init__(self) -> None:
+            super().__init__()
+
+            # 윈도우 설정
+            self.title("PDF Tool")
+            self.geometry(f"{self.WINDOW_WIDTH}x{self.WINDOW_HEIGHT}")
+            self.minsize(800, 600)
+
+            # 테마 적용
+            apply_theme(DARK_MODE)
+
+            # 페이지 매니저
+            self.page_manager = PageManager()
+
+            # 실행 상태 추적 (윈도우 닫기 확인용)
+            self._is_any_executing = False
+
+            # 네비게이션 버튼 참조 저장
+            self._nav_buttons: dict[str, ctk.CTkButton] = {}
+
+            # UI 구성
+            self._create_sidebar()
+            self._create_main_area()
+            self._register_pages()
+
+            # 글로벌 예외 핸들러
+            self.report_callback_exception = self._handle_exception
+
+            # 윈도우 닫기 확인 (REQ-C-001)
+            self.protocol("WM_DELETE_WINDOW", self._on_close)
+
+            # 첫 번째 페이지로 전환
+            self._on_nav_click("Cut")
+
+        def _create_sidebar(self) -> None:
+            """사이드바를 생성한다."""
+            self.sidebar = ctk.CTkFrame(self, width=self.SIDEBAR_WIDTH, corner_radius=0)
+            self.sidebar.pack(side="left", fill="y")
+            self.sidebar.pack_propagate(False)
+
+            # 앱 제목
+            title_label = ctk.CTkLabel(
+                self.sidebar,
+                text="PDF Tool",
+                font=ctk.CTkFont(size=20, weight="bold"),
+            )
+            title_label.pack(padx=20, pady=(20, 20))
+
+            # 네비게이션 버튼 생성
+            for name in NAV_BUTTONS:
+                btn = ctk.CTkButton(
+                    self.sidebar,
+                    text=name,
+                    command=lambda n=name: self._on_nav_click(n),
+                    height=35,
+                    corner_radius=8,
+                )
+                btn.pack(padx=15, pady=4, fill="x")
+                self._nav_buttons[name] = btn
+
+            # 하단 영역: 테마 토글 버튼 (REQ-O-001)
+            spacer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+            spacer.pack(fill="both", expand=True)
+
+            self.theme_btn = ctk.CTkButton(
+                self.sidebar,
+                text="테마 전환",
+                command=lambda: toggle_theme(),
+                height=30,
+                corner_radius=8,
+            )
+            self.theme_btn.pack(padx=15, pady=(4, 15), fill="x")
+
+        def _create_main_area(self) -> None:
+            """메인 콘텐츠 영역을 생성한다."""
+            self.main_frame = ctk.CTkFrame(self)
+            self.main_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
+
+        def _register_pages(self) -> None:
+            """모든 작업 페이지를 생성하고 등록한다."""
+            for name, page_class in PAGE_CLASSES.items():
+                page = page_class(self.main_frame)
+                self.page_manager.register(name, page)
+
+        def _on_nav_click(self, name: str) -> None:
+            """네비게이션 버튼 클릭 핸들러.
+
+            Args:
+                name: 클릭된 버튼의 페이지 이름
+            """
+            self.page_manager.switch_to(name)
+            self._update_button_highlight(name)
+
+        def _update_button_highlight(self, active_name: str) -> None:
+            """활성 버튼을 하이라이트한다.
+
+            Args:
+                active_name: 활성화할 버튼 이름
+            """
+            for name, btn in self._nav_buttons.items():
+                if name == active_name:
+                    btn.configure(fg_color=("gray25", "gray75"))
+                else:
+                    btn.configure(fg_color=("gray40", "gray55"))
+
+        def _handle_exception(self, exc_type, exc_value, exc_tb) -> None:
+            """처리되지 않은 예외를 잡아 메시지 박스로 표시한다."""
+            msg = format_exception_message(exc_value)
+            mb.showerror("오류", msg)
+
+        def _on_close(self) -> None:
+            """윈도우 닫기 핸들러. 작업 중이면 확인을 요청한다."""
+            if should_confirm_close(self._is_any_executing):
+                if not mb.askyesno("확인", "작업이 진행 중입니다. 종료하시겠습니까?"):
+                    return
+            self.destroy()
+
+    return PDFToolApp()
+
+
+def main() -> None:
+    """GUI 애플리케이션 진입점."""
+    app = _create_app()
+    app.mainloop()
+
+
+if __name__ == "__main__":
+    main()
