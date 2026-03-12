@@ -6,7 +6,6 @@ from pathlib import Path
 
 import customtkinter as ctk
 
-from pdf_tool.gui.pages.base_page import generate_output_path
 from pdf_tool.gui.pages.base_page_widget import BasePageWidget
 from pdf_tool.gui.pages.compress_page import run_compress
 

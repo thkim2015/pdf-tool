@@ -10,6 +10,8 @@
 | rich | >= 13.0.0 | Terminal formatting |
 | reportlab | >= 4.4.10 | Watermark overlay generation |
 | Pillow | >= 12.1.1 | Image watermark processing |
+| customtkinter | >= 5.2.0 | Modern dark theme GUI framework (optional) |
+| tkinterdnd2 | >= 0.4.2 | Drag and drop support (optional) |
 
 ## Development
 
@@ -39,6 +41,8 @@
 - Facade: cli.py orchestrates all commands
 - Strategy: resize modes (fit/stretch/fill)
 - Factory: conftest.py create_pdf fixture
+- Template Method: BasePage for GUI pages
+- Observer: Threading callbacks for async GUI updates
 
 ## Exception Hierarchy
 

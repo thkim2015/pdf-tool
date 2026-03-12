@@ -1,6 +1,6 @@
 # pdf-tool
 
-PDF 파일을 커맨드라인에서 조작할 수 있는 Python CLI 도구입니다. 페이지 추출, 병합, 분할, 회전, 크기 변경, 압축, 워터마크 적용, 메타데이터 관리 기능을 제공합니다.
+PDF 파일을 조작할 수 있는 Python CLI + GUI 도구입니다. 페이지 추출, 병합, 분할, 회전, 크기 변경, 압축, 워터마크 적용, 메타데이터 관리 기능을 CLI와 GUI로 제공합니다.
 
 ## 기능
 
@@ -29,6 +29,12 @@ uv pip install pdf-tool
 pip install pdf-tool
 ```
 
+**GUI 포함 설치:**
+
+```bash
+uv pip install "pdf-tool[gui]"
+```
+
 **개발 환경 설치:**
 
 ```bash
@@ -37,7 +43,21 @@ cd pdf_tool
 uv pip install -e ".[dev]"
 ```
 
-## 사용법
+## GUI 사용법
+
+GUI 모드를 사용하려면 `gui` 옵션 의존성을 설치한 후 실행합니다:
+
+```bash
+# GUI 실행
+pdf-tool-gui
+```
+
+- 사이드바에서 작업을 선택 (Cut, Merge, Split, Rotate, Resize, Compress, Watermark, Info)
+- PDF 파일을 드래그 앤 드롭하거나 파일 선택 버튼으로 로드
+- 파라미터 설정 후 실행 버튼 클릭
+- 다크/라이트 테마 전환 지원
+
+## CLI 사용법
 
 ### cut - 페이지 추출
 
@@ -162,6 +182,8 @@ pdf-tool cut --help
 | rich | >= 13.0.0 | 터미널 출력 포맷팅 |
 | reportlab | >= 4.4.10 | 워터마크 오버레이 생성 |
 | Pillow | >= 12.1.1 | 이미지 워터마크 처리 |
+| customtkinter | >= 5.2.0 | GUI 프레임워크 (선택) |
+| tkinterdnd2 | >= 0.4.2 | 드래그 앤 드롭 (선택) |
 
 - **Python**: 3.13+
 - **패키지 관리**: uv 또는 pip (pyproject.toml)

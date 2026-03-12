@@ -6,8 +6,8 @@
 from __future__ import annotations
 
 import tkinter.filedialog as fd
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import customtkinter as ctk
 

@@ -52,6 +52,6 @@ class InfoPageWidget(ctk.CTkFrame):
             metadata = load_metadata(path)
             self.after(0, lambda: self.result_display.show_info(metadata))
         except Exception as exc:
-            self.after(0, lambda: self.result_display.show_error(
-                format_exception_message(exc)
+            self.after(0, lambda e=exc: self.result_display.show_error(
+                format_exception_message(e)
             ))

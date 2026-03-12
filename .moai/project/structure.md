@@ -26,7 +26,20 @@ pdf_tool/
 │   └── utils/
 │       ├── file_utils.py      # Output filename generation
 │       └── logging.py         # Rich-based terminal output
-├── tests/                     # 17 test files (~2,600 lines)
+│   └── gui/                   # GUI module (SPEC-UI-001)
+│       ├── app.py             # CTk main application + sidebar
+│       ├── theme.py           # Dark/light theme settings
+│       ├── pages/             # 8 operation pages + base
+│       │   ├── base_page.py   # Common page logic
+│       │   ├── *_page.py      # Pure logic per operation
+│       │   └── *_page_widget.py # CTk widget per operation
+│       └── widgets/           # Reusable widgets
+│           ├── file_picker.py # File selection + drag-and-drop
+│           ├── progress_bar.py # Indeterminate progress
+│           ├── page_range_input.py # Page range input
+│           ├── file_list.py   # Multi-file list (merge)
+│           └── result_display.py # Success/error display
+├── tests/                     # 22 test files (~3,200 lines)
 │   ├── conftest.py            # pytest fixtures
 │   └── test_*.py              # Per-module tests
 ├── .github/workflows/
@@ -39,19 +52,19 @@ pdf_tool/
 ## Architecture
 
 ```
-CLI Layer (cli.py)
-    ↓
-Command Layer (commands/*.py)
+CLI Layer (cli.py)          GUI Layer (gui/app.py)
+    ↓                           ↓
+Command Layer (commands/*.py) ←──┘
     ↓
 Core Services (core/*.py)
     ↓
 Utilities (utils/*.py)
     ↓
-External: pypdf, reportlab, Pillow, rich
+External: pypdf, reportlab, Pillow, rich, customtkinter
 ```
 
 ## Code Metrics
 
-- Source: ~3,140 lines (21 files)
-- Tests: ~2,600 lines (17 files)
-- Total: ~5,740 lines
+- Source: ~4,750 lines (54 files)
+- Tests: ~3,200 lines (22 files)
+- Total: ~7,950 lines

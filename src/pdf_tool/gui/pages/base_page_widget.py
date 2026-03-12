@@ -12,7 +12,11 @@ from pathlib import Path
 import customtkinter as ctk
 
 from pdf_tool.gui.app import format_exception_message
-from pdf_tool.gui.pages.base_page import ExecutionState, generate_output_path, would_overwrite
+from pdf_tool.gui.pages.base_page import (
+    ExecutionState,
+    generate_output_path,
+    would_overwrite,
+)
 from pdf_tool.gui.widgets.file_picker_widget import FilePickerWidget
 from pdf_tool.gui.widgets.progress_bar_widget import ProgressBarWidget
 from pdf_tool.gui.widgets.result_display_widget import ResultDisplayWidget
@@ -104,7 +108,7 @@ class BasePageWidget(ctk.CTkFrame):
             result = self.execute_command(input_file, output_path)
             self.after(0, lambda: self._on_success(result, output_path))
         except Exception as exc:
-            self.after(0, lambda: self._on_error(exc))
+            self.after(0, lambda e=exc: self._on_error(e))
 
     def _on_success(self, result, output_path: Path) -> None:
         """메인 스레드에서 성공 결과를 처리한다."""

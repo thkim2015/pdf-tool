@@ -93,7 +93,7 @@ class MergePageWidget(ctk.CTkFrame):
             result = run_merge(files, output_path)
             self.after(0, lambda: self._on_success(result))
         except Exception as exc:
-            self.after(0, lambda: self._on_error(exc))
+            self.after(0, lambda e=exc: self._on_error(e))
 
     def _on_success(self, result: Path) -> None:
         """병합 성공 처리."""

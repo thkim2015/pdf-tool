@@ -7,8 +7,8 @@ CustomTkinter 기반의 PDF 파일 선택 위젯이다.
 from __future__ import annotations
 
 import tkinter.filedialog as fd
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable
 
 import customtkinter as ctk
 

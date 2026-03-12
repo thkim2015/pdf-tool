@@ -79,7 +79,6 @@ def should_confirm_close(is_executing: bool) -> bool:
 
 def _create_app():
     """PDFToolApp 인스턴스를 생성한다. (지연 임포트)"""
-    import sys
     import tkinter.messagebox as mb
 
     import customtkinter as ctk
@@ -95,7 +94,7 @@ def _create_app():
     from pdf_tool.gui.theme import DARK_MODE, apply_theme, toggle_theme
 
     # 페이지 이름과 위젯 클래스 매핑
-    PAGE_CLASSES = {
+    page_classes = {
         "Cut": CutPageWidget,
         "Merge": MergePageWidget,
         "Split": SplitPageWidget,
@@ -194,7 +193,7 @@ def _create_app():
 
         def _register_pages(self) -> None:
             """모든 작업 페이지를 생성하고 등록한다."""
-            for name, page_class in PAGE_CLASSES.items():
+            for name, page_class in page_classes.items():
                 page = page_class(self.main_frame)
                 self.page_manager.register(name, page)
 
@@ -226,9 +225,11 @@ def _create_app():
 
         def _on_close(self) -> None:
             """윈도우 닫기 핸들러. 작업 중이면 확인을 요청한다."""
-            if should_confirm_close(self._is_any_executing):
-                if not mb.askyesno("확인", "작업이 진행 중입니다. 종료하시겠습니까?"):
-                    return
+            confirm = should_confirm_close(self._is_any_executing)
+            if confirm and not mb.askyesno(
+                "확인", "작업이 진행 중입니다. 종료하시겠습니까?"
+            ):
+                return
             self.destroy()
 
     return PDFToolApp()
