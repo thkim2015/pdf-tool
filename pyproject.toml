@@ -34,7 +34,7 @@ src = ["src", "tests"]
 select = ["E", "F", "W", "I", "N", "UP", "B", "A", "SIM"]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["N802"]  # 테스트에서 한글 함수명 허용
+"tests/**/*.py" = ["N801", "N802"]  # 테스트에서 한글 클래스/함수명 허용
 
 [tool.ruff.lint.pycodestyle]
 max-line-length = 99
@@ -43,6 +43,7 @@ max-line-length = 99
 gui = [
     "customtkinter>=5.2.0",
     "tkinterdnd2>=0.4.2",
+    "pypdfium2>=4.0.0",
 ]
 dev = [
     "pytest>=8.0.0",

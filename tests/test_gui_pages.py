@@ -5,7 +5,7 @@ GUI 위젯은 mock하고 커맨드 호출 로직만 테스트한다.
 """
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -86,7 +86,7 @@ class Test_RotatePage_로직:
 
         with patch("pdf_tool.gui.pages.rotate_page.rotate_pdf") as mock_cmd:
             mock_cmd.return_value = Path("/tmp/test_rotated.pdf")
-            result = run_rotate(
+            run_rotate(
                 Path("/tmp/test.pdf"), 90, None, Path("/tmp/test_rotated.pdf")
             )
             mock_cmd.assert_called_once_with(
@@ -102,7 +102,7 @@ class Test_RotatePage_로직:
 
         with patch("pdf_tool.gui.pages.rotate_page.rotate_pdf") as mock_cmd:
             mock_cmd.return_value = Path("/tmp/test_rotated.pdf")
-            result = run_rotate(
+            run_rotate(
                 Path("/tmp/test.pdf"), 180, "1,3", Path("/tmp/test_rotated.pdf")
             )
             mock_cmd.assert_called_once_with(
@@ -145,7 +145,7 @@ class Test_ResizePage_로직:
 
         with patch("pdf_tool.gui.pages.resize_page.resize_pdf") as mock_cmd:
             mock_cmd.return_value = Path("/tmp/test_resized.pdf")
-            result = run_resize(
+            run_resize(
                 Path("/tmp/test.pdf"), "A4", "fit", Path("/tmp/test_resized.pdf")
             )
             mock_cmd.assert_called_once_with(
@@ -185,7 +185,7 @@ class Test_WatermarkPage_로직:
 
         with patch("pdf_tool.gui.pages.watermark_page.watermark_pdf") as mock_cmd:
             mock_cmd.return_value = Path("/tmp/test_watermarked.pdf")
-            result = run_watermark(
+            run_watermark(
                 input_path=Path("/tmp/test.pdf"),
                 output_path=Path("/tmp/test_watermarked.pdf"),
                 text="SAMPLE",
@@ -212,7 +212,7 @@ class Test_WatermarkPage_로직:
 
         with patch("pdf_tool.gui.pages.watermark_page.watermark_pdf") as mock_cmd:
             mock_cmd.return_value = Path("/tmp/test_watermarked.pdf")
-            result = run_watermark(
+            run_watermark(
                 input_path=Path("/tmp/test.pdf"),
                 output_path=Path("/tmp/test_watermarked.pdf"),
                 text=None,

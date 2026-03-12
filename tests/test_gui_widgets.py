@@ -6,8 +6,6 @@ customtkinter 위젯을 mock하여 순수 로직을 검증한다.
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 
 class Test_FilePicker_로직:
     """FilePicker 위젯의 파일 선택 로직을 검증한다."""

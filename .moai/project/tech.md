@@ -12,6 +12,7 @@
 | Pillow | >= 12.1.1 | Image watermark processing |
 | customtkinter | >= 5.2.0 | Modern dark theme GUI framework (optional) |
 | tkinterdnd2 | >= 0.4.2 | Drag and drop support (optional) |
+| pypdfium2 | >= 4.0.0 | PDF page rendering for preview (optional) |
 
 ## Development
 

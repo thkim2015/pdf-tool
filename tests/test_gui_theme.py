@@ -1,6 +1,6 @@
 """GUI 테마 설정 테스트."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pdf_tool.gui.theme as theme_module
 from pdf_tool.gui.theme import (

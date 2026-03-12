@@ -4,9 +4,6 @@
 """
 
 from pathlib import Path
-from unittest.mock import MagicMock, patch
-
-import pytest
 
 
 class Test_출력_경로_생성:

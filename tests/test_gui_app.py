@@ -1,6 +1,5 @@
 """GUI 메인 앱 테스트."""
 
-import sys
 from unittest.mock import MagicMock
 
 
@@ -11,7 +10,7 @@ class Test_네비게이션_버튼:
         from pdf_tool.gui.app import NAV_BUTTONS
 
         expected = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Info"]
-        assert NAV_BUTTONS == expected
+        assert expected == NAV_BUTTONS
 
     def test_네비게이션_버튼_수(self):
         from pdf_tool.gui.app import NAV_BUTTONS

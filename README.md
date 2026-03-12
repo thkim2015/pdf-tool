@@ -55,6 +55,7 @@ pdf-tool-gui
 - 사이드바에서 작업을 선택 (Cut, Merge, Split, Rotate, Resize, Compress, Watermark, Info)
 - PDF 파일을 드래그 앤 드롭하거나 파일 선택 버튼으로 로드
 - 파라미터 설정 후 실행 버튼 클릭
+- 작업 완료 후 결과 PDF 첫 페이지 미리보기 (썸네일 클릭 시 시스템 뷰어로 열기)
 - 다크/라이트 테마 전환 지원
 
 ## CLI 사용법
@@ -184,6 +185,7 @@ pdf-tool cut --help
 | Pillow | >= 12.1.1 | 이미지 워터마크 처리 |
 | customtkinter | >= 5.2.0 | GUI 프레임워크 (선택) |
 | tkinterdnd2 | >= 0.4.2 | 드래그 앤 드롭 (선택) |
+| pypdfium2 | >= 4.0.0 | PDF 미리보기 렌더링 (선택) |
 
 - **Python**: 3.13+
 - **패키지 관리**: uv 또는 pip (pyproject.toml)

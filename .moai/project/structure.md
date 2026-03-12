@@ -38,7 +38,9 @@ pdf_tool/
 │           ├── progress_bar.py # Indeterminate progress
 │           ├── page_range_input.py # Page range input
 │           ├── file_list.py   # Multi-file list (merge)
-│           └── result_display.py # Success/error display
+│           ├── result_display.py # Success/error display
+│           ├── pdf_preview.py   # PDF first-page rendering logic
+│           └── pdf_preview_widget.py # Preview thumbnail widget
 ├── tests/                     # 22 test files (~3,200 lines)
 │   ├── conftest.py            # pytest fixtures
 │   └── test_*.py              # Per-module tests
@@ -60,7 +62,7 @@ Core Services (core/*.py)
     ↓
 Utilities (utils/*.py)
     ↓
-External: pypdf, reportlab, Pillow, rich, customtkinter
+External: pypdf, reportlab, Pillow, rich, customtkinter, pypdfium2
 ```
 
 ## Code Metrics
