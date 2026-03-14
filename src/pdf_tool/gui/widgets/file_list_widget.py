@@ -11,6 +11,15 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.gui.constants import (
+    BORDER_RADIUS_DEFAULT,
+    BUTTON_HEIGHT_DEFAULT,
+    BUTTON_HEIGHT_SM,
+    FONT_SMALL,
+    PADDING_MD,
+    PADDING_SM,
+)
+from pdf_tool.gui.theme import get_current_palette
 from pdf_tool.gui.widgets.file_list import FileListState
 
 
@@ -36,17 +45,27 @@ class FileListWidget(ctk.CTkFrame):
 
     def _create_ui(self) -> None:
         """UI 컴포넌트를 생성한다."""
+        palette = get_current_palette()
+        
         # 파일 추가 버튼
         self.add_btn = ctk.CTkButton(
             self,
-            text="파일 추가...",
+            text="➕ 파일 추가...",
             command=self._add_files,
+            height=BUTTON_HEIGHT_DEFAULT,
+            corner_radius=BORDER_RADIUS_DEFAULT,
+            fg_color=palette.primary,
+            hover_color=palette.button_hover,
         )
-        self.add_btn.pack(pady=5, padx=10, fill="x")
+        self.add_btn.pack(pady=PADDING_MD, padx=PADDING_MD, fill="x")
 
         # 파일 목록 스크롤 프레임
-        self.list_frame = ctk.CTkScrollableFrame(self, height=200)
-        self.list_frame.pack(pady=5, padx=10, fill="both", expand=True)
+        self.list_frame = ctk.CTkScrollableFrame(
+            self,
+            height=200,
+            fg_color=palette.surface,
+        )
+        self.list_frame.pack(pady=PADDING_MD, padx=PADDING_MD, fill="both", expand=True)
 
     def _add_files(self) -> None:
         """파일 선택 다이얼로그로 파일을 추가한다."""
@@ -72,33 +91,62 @@ class FileListWidget(ctk.CTkFrame):
 
     def _create_item(self, index: int, file_path: Path) -> ctk.CTkFrame:
         """파일 목록 항목 위젯을 생성한다."""
-        frame = ctk.CTkFrame(self.list_frame)
-        frame.pack(fill="x", pady=2)
+        palette = get_current_palette()
+        
+        frame = ctk.CTkFrame(
+            self.list_frame,
+            fg_color=palette.surface_elevated,
+        )
+        frame.pack(fill="x", pady=PADDING_SM, padx=PADDING_SM)
 
         # 파일 이름 레이블
-        label = ctk.CTkLabel(frame, text=file_path.name, anchor="w")
-        label.pack(side="left", padx=5, fill="x", expand=True)
+        label = ctk.CTkLabel(
+            frame,
+            text=file_path.name,
+            anchor="w",
+            text_color=palette.text_primary,
+            font=ctk.CTkFont(FONT_SMALL[0], FONT_SMALL[1], FONT_SMALL[2]),
+        )
+        label.pack(side="left", padx=PADDING_MD, fill="x", expand=True)
 
         # 위로 이동 버튼
         up_btn = ctk.CTkButton(
-            frame, text="^", width=30,
+            frame,
+            text="↑",
+            width=36,
+            height=BUTTON_HEIGHT_SM,
+            corner_radius=BORDER_RADIUS_DEFAULT,
+            fg_color=palette.secondary,
+            hover_color=palette.button_hover,
             command=lambda: self._move_up(index),
         )
-        up_btn.pack(side="left", padx=2)
+        up_btn.pack(side="left", padx=PADDING_SM)
 
         # 아래로 이동 버튼
         down_btn = ctk.CTkButton(
-            frame, text="v", width=30,
+            frame,
+            text="↓",
+            width=36,
+            height=BUTTON_HEIGHT_SM,
+            corner_radius=BORDER_RADIUS_DEFAULT,
+            fg_color=palette.secondary,
+            hover_color=palette.button_hover,
             command=lambda: self._move_down(index),
         )
-        down_btn.pack(side="left", padx=2)
+        down_btn.pack(side="left", padx=PADDING_SM)
 
         # 제거 버튼
         remove_btn = ctk.CTkButton(
-            frame, text="X", width=30, fg_color="red",
+            frame,
+            text="✕",
+            width=36,
+            height=BUTTON_HEIGHT_SM,
+            corner_radius=BORDER_RADIUS_DEFAULT,
+            fg_color=palette.error,
+            hover_color=palette.button_hover,
             command=lambda: self._remove(index),
         )
-        remove_btn.pack(side="left", padx=2)
+        remove_btn.pack(side="left", padx=PADDING_SM)
 
         return frame
 

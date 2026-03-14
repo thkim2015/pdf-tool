@@ -12,7 +12,14 @@ from pathlib import Path
 import customtkinter as ctk
 
 from pdf_tool.gui.app import format_exception_message
+from pdf_tool.gui.constants import (
+    BORDER_RADIUS_DEFAULT,
+    BUTTON_HEIGHT_DEFAULT,
+    PADDING_LG,
+    PADDING_MD,
+)
 from pdf_tool.gui.pages.merge_page import run_merge
+from pdf_tool.gui.theme import get_current_palette
 from pdf_tool.gui.widgets.file_list_widget import FileListWidget
 from pdf_tool.gui.widgets.progress_bar_widget import ProgressBarWidget
 from pdf_tool.gui.widgets.result_display_widget import ResultDisplayWidget
@@ -27,6 +34,7 @@ class MergePageWidget(ctk.CTkFrame):
     def __init__(self, master: ctk.CTkFrame, **kwargs) -> None:
         super().__init__(master, **kwargs)
 
+        palette = get_current_palette()
         self._is_executing = False
 
         # 파일 목록
@@ -34,23 +42,27 @@ class MergePageWidget(ctk.CTkFrame):
             self,
             on_list_changed=self._on_list_changed,
         )
-        self.file_list.pack(fill="both", expand=True, padx=10, pady=5)
+        self.file_list.pack(fill="both", expand=True, padx=PADDING_MD, pady=PADDING_MD)
 
         # 실행 버튼
         self.execute_btn = ctk.CTkButton(
             self,
-            text="병합 실행",
+            text="✨ 병합 실행",
             command=self._on_execute,
             state="disabled",
+            height=BUTTON_HEIGHT_DEFAULT,
+            corner_radius=BORDER_RADIUS_DEFAULT,
+            fg_color=palette.primary,
+            hover_color=palette.button_hover,
         )
-        self.execute_btn.pack(pady=10, padx=10, fill="x")
+        self.execute_btn.pack(pady=PADDING_LG, padx=PADDING_MD, fill="x")
 
         # 프로그레스 바
         self.progress_bar = ProgressBarWidget(self)
 
         # 결과 표시
         self.result_display = ResultDisplayWidget(self)
-        self.result_display.pack(fill="x", padx=10, pady=5)
+        self.result_display.pack(fill="x", padx=PADDING_MD, pady=PADDING_MD)
 
     def _on_list_changed(self) -> None:
         """파일 목록이 변경되면 실행 버튼 상태를 갱신한다."""

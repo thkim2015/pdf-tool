@@ -6,8 +6,10 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.gui.constants import FONT_SMALL, PADDING_MD
 from pdf_tool.gui.pages.base_page_widget import BasePageWidget
 from pdf_tool.gui.pages.compress_page import run_compress
+from pdf_tool.gui.theme import get_current_palette
 
 
 class CompressPageWidget(BasePageWidget):
@@ -15,8 +17,14 @@ class CompressPageWidget(BasePageWidget):
 
     def create_params_ui(self, parent: ctk.CTkFrame) -> None:
         """파라미터 UI 없음 (압축은 별도 설정 불필요)."""
-        label = ctk.CTkLabel(parent, text="PDF를 압축합니다.")
-        label.pack(pady=5)
+        palette = get_current_palette()
+        label = ctk.CTkLabel(
+            parent,
+            text="ℹ️ PDF를 압축합니다. (크기 감소, 품질 유지)",
+            text_color=palette.text_secondary,
+            font=ctk.CTkFont(FONT_SMALL[0], FONT_SMALL[1], FONT_SMALL[2]),
+        )
+        label.pack(pady=PADDING_MD)
 
     def execute_command(self, input_file: Path, output_path: Path):
         """압축을 실행한다."""

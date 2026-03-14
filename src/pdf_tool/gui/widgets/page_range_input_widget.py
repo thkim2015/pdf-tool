@@ -7,6 +7,13 @@ from __future__ import annotations
 
 import customtkinter as ctk
 
+from pdf_tool.gui.constants import (
+    BORDER_RADIUS_DEFAULT,
+    FONT_LABEL,
+    INPUT_HEIGHT_DEFAULT,
+    PADDING_MD,
+)
+from pdf_tool.gui.theme import get_current_palette
 from pdf_tool.gui.widgets.page_range_input import validate_page_range_input
 
 
@@ -25,13 +32,28 @@ class PageRangeInputWidget(ctk.CTkFrame):
     ) -> None:
         super().__init__(master, **kwargs)
 
+        palette = get_current_palette()
+
         # 레이블
-        self.label = ctk.CTkLabel(self, text=label_text)
-        self.label.pack(pady=(5, 0), padx=10, anchor="w")
+        self.label = ctk.CTkLabel(
+            self,
+            text=label_text,
+            text_color=palette.text_primary,
+            font=ctk.CTkFont(FONT_LABEL[0], FONT_LABEL[1], FONT_LABEL[2]),
+        )
+        self.label.pack(pady=(PADDING_MD, 0), padx=PADDING_MD, anchor="w")
 
         # 입력 필드
-        self.entry = ctk.CTkEntry(self, placeholder_text=placeholder)
-        self.entry.pack(pady=5, padx=10, fill="x")
+        self.entry = ctk.CTkEntry(
+            self,
+            placeholder_text=placeholder,
+            height=INPUT_HEIGHT_DEFAULT,
+            corner_radius=BORDER_RADIUS_DEFAULT,
+            fg_color=palette.surface_elevated,
+            text_color=palette.text_primary,
+            placeholder_text_color=palette.text_tertiary,
+        )
+        self.entry.pack(pady=PADDING_MD, padx=PADDING_MD, fill="x")
 
     def get_value(self) -> str:
         """입력된 페이지 범위 문자열을 반환한다.

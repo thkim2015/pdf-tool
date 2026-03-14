@@ -11,6 +11,7 @@ from pathlib import Path
 import customtkinter as ctk
 
 from pdf_tool.gui.app import format_exception_message
+from pdf_tool.gui.constants import PADDING_MD
 from pdf_tool.gui.pages.info_page import load_metadata
 from pdf_tool.gui.widgets.file_picker_widget import FilePickerWidget
 from pdf_tool.gui.widgets.result_display_widget import ResultDisplayWidget
@@ -30,11 +31,11 @@ class InfoPageWidget(ctk.CTkFrame):
             self,
             on_file_selected=self._on_file_selected,
         )
-        self.file_picker.pack(fill="x", padx=10, pady=5)
+        self.file_picker.pack(fill="x", padx=PADDING_MD, pady=PADDING_MD)
 
         # 결과 표시
         self.result_display = ResultDisplayWidget(self)
-        self.result_display.pack(fill="both", expand=True, padx=10, pady=5)
+        self.result_display.pack(fill="both", expand=True, padx=PADDING_MD, pady=PADDING_MD)
 
     def _on_file_selected(self, path: Path) -> None:
         """파일이 선택되면 메타데이터를 로드한다."""

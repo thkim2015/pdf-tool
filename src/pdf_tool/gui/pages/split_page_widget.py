@@ -6,6 +6,14 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.gui.constants import (
+    BORDER_RADIUS_DEFAULT,
+    BUTTON_HEIGHT_DEFAULT,
+    PADDING_LG,
+    PADDING_MD,
+)
+from pdf_tool.gui.theme import get_current_palette
+
 from pdf_tool.gui.pages.base_page_widget import BasePageWidget
 from pdf_tool.gui.pages.split_page import run_split
 
