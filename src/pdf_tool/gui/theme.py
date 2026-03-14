@@ -1,11 +1,13 @@
 """GUI 테마 설정 모듈.
 
-customtkinter의 외관 모드를 관리한다.
+customtkinter의 외관 모드와 색상 팔레트를 관리한다.
 """
 
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+
+from pdf_tool.gui.colors import ColorPalette, get_palette
 
 if TYPE_CHECKING:
     pass
@@ -16,6 +18,7 @@ LIGHT_MODE = "light"
 
 # 현재 테마 상태
 _current_theme = DARK_MODE
+_current_palette: ColorPalette | None = None
 
 
 def _get_ctk():
@@ -43,9 +46,10 @@ def apply_theme(mode: str) -> None:
     Args:
         mode: 적용할 테마 모드 ("dark" 또는 "light")
     """
-    global _current_theme
+    global _current_theme, _current_palette
     _ensure_ctk().set_appearance_mode(mode)
     _current_theme = mode
+    _current_palette = get_palette(mode)
 
 
 def toggle_theme() -> str:
@@ -67,3 +71,15 @@ def get_current_theme() -> str:
         현재 테마 모드 문자열
     """
     return _current_theme
+
+
+def get_current_palette() -> ColorPalette:
+    """현재 테마의 색상 팔레트를 반환한다.
+
+    Returns:
+        현재 테마의 ColorPalette 객체
+    """
+    global _current_palette
+    if _current_palette is None:
+        _current_palette = get_palette(_current_theme)
+    return _current_palette
