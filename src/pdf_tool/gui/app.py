@@ -101,6 +101,7 @@ def _create_app():
 
     from pdf_tool.gui.pages.compress_page_widget import CompressPageWidget
     from pdf_tool.gui.pages.cut_page_widget import CutPageWidget
+    from pdf_tool.gui.pages.image_to_pdf_page_widget import ImageToPdfPageWidget
     from pdf_tool.gui.pages.info_page_widget import InfoPageWidget
     from pdf_tool.gui.pages.merge_page_widget import MergePageWidget
     from pdf_tool.gui.pages.resize_page_widget import ResizePageWidget
@@ -118,6 +119,7 @@ def _create_app():
         "Resize": ResizePageWidget,
         "Compress": CompressPageWidget,
         "Watermark": WatermarkPageWidget,
+        "Images to PDF": ImageToPdfPageWidget,
         "Info": InfoPageWidget,
     }
 

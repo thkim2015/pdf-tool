@@ -7,15 +7,15 @@ class Test_네비게이션_버튼:
     """네비게이션 버튼 상수가 올바르게 정의되어 있는지 검증한다."""
 
     def test_네비게이션_버튼_목록(self):
-        from pdf_tool.gui.app import NAV_BUTTONS
+        from pdf_tool.gui.constants import NAV_BUTTONS
 
-        expected = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Info"]
+        expected = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Images to PDF", "Info"]
         assert expected == NAV_BUTTONS
 
     def test_네비게이션_버튼_수(self):
-        from pdf_tool.gui.app import NAV_BUTTONS
+        from pdf_tool.gui.constants import NAV_BUTTONS
 
-        assert len(NAV_BUTTONS) == 8
+        assert len(NAV_BUTTONS) == 9
 
 
 class Test_PageManager:

@@ -180,7 +180,7 @@ PROGRESS_ANIMATION_MS = 50
 # ============================================================================
 
 # 네비게이션 버튼 이름
-NAV_BUTTONS = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Info"]
+NAV_BUTTONS = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Images to PDF", "Info"]
 
 # 네비게이션 버튼 개수
 NAV_BUTTON_COUNT = len(NAV_BUTTONS)

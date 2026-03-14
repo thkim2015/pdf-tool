@@ -171,14 +171,14 @@ class Test_네비게이션:
     """네비게이션 상수들이 올바르게 정의되어 있는지 검증한다."""
 
     def test_네비게이션_버튼_목록(self):
-        """네비게이션 버튼 목록이 8개이다."""
-        expected = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Info"]
+        """네비게이션 버튼 목록이 9개이다."""
+        expected = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Images to PDF", "Info"]
         assert NAV_BUTTONS == expected
 
     def test_네비게이션_버튼_개수(self):
         """네비게이션 버튼 개수 상수와 실제 개수가 일치한다."""
         assert NAV_BUTTON_COUNT == len(NAV_BUTTONS)
-        assert NAV_BUTTON_COUNT == 8
+        assert NAV_BUTTON_COUNT == 9
 
     def test_네비게이션_버튼_고유성(self):
         """네비게이션 버튼 이름들이 고유하다."""

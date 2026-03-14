@@ -232,3 +232,50 @@ class Test_WatermarkPage_로직:
                 position="center",
                 pages="1-3",
             )
+
+
+# --- ImageToPdfPage ---
+class Test_ImageToPdfPage_로직:
+    """ImageToPdfPage의 변환 실행 로직을 검증한다."""
+
+    def test_단일_이미지_변환(self):
+        """단일 이미지를 PDF로 변환한다."""
+        from pdf_tool.gui.pages.image_to_pdf_page import run_image_to_pdf
+
+        with patch("pdf_tool.gui.pages.image_to_pdf_page.image_to_pdf") as mock_cmd:
+            mock_cmd.return_value = None
+            images = [Path("/tmp/image1.png")]
+            result = run_image_to_pdf(
+                image_paths=images,
+                output_path=Path("/tmp/output.pdf"),
+                keep_aspect_ratio=True,
+            )
+            mock_cmd.assert_called_once_with(
+                image_paths=images,
+                output_path=Path("/tmp/output.pdf"),
+                keep_aspect_ratio=True,
+            )
+            assert result == Path("/tmp/output.pdf")
+
+    def test_여러_이미지_변환(self):
+        """여러 이미지를 하나의 PDF로 변환한다."""
+        from pdf_tool.gui.pages.image_to_pdf_page import run_image_to_pdf
+
+        with patch("pdf_tool.gui.pages.image_to_pdf_page.image_to_pdf") as mock_cmd:
+            mock_cmd.return_value = None
+            images = [
+                Path("/tmp/image1.png"),
+                Path("/tmp/image2.jpg"),
+                Path("/tmp/image3.bmp"),
+            ]
+            result = run_image_to_pdf(
+                image_paths=images,
+                output_path=Path("/tmp/output.pdf"),
+                keep_aspect_ratio=False,
+            )
+            mock_cmd.assert_called_once_with(
+                image_paths=images,
+                output_path=Path("/tmp/output.pdf"),
+                keep_aspect_ratio=False,
+            )
+            assert result == Path("/tmp/output.pdf")
