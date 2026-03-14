@@ -17,6 +17,7 @@ from pdf_tool.gui.constants import (
     NAV_BUTTONS,
     PADDING_LG,
     PADDING_MD,
+    PADDING_SM,
     PADDING_XL,
     SIDEBAR_WIDTH,
     WINDOW_HEIGHT,
@@ -180,10 +181,21 @@ def _create_app():
             )
             title_label.pack(padx=PADDING_LG, pady=(PADDING_XL, PADDING_LG))
 
+            # 구분선
+            separator = ctk.CTkFrame(
+                self.sidebar,
+                height=1,
+                fg_color=palette.surface_elevated,
+            )
+            separator.pack(padx=PADDING_MD, pady=(0, PADDING_LG), fill="x")
+
             # 네비게이션 버튼 생성
+            nav_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
+            nav_frame.pack(padx=PADDING_SM, pady=0, fill="x")
+
             for name in NAV_BUTTONS:
                 btn = ctk.CTkButton(
-                    self.sidebar,
+                    nav_frame,
                     text=name,
                     command=lambda n=name: self._on_nav_click(n),
                     height=BUTTON_HEIGHT_DEFAULT,
@@ -192,12 +204,20 @@ def _create_app():
                     text_color=palette.text_primary,
                     hover_color=palette.button_hover,
                 )
-                btn.pack(padx=PADDING_MD, pady=PADDING_MD, fill="x")
+                btn.pack(padx=PADDING_MD, pady=PADDING_SM, fill="x")
                 self._nav_buttons[name] = btn
 
             # 하단 영역: 테마 토글 버튼 (REQ-O-001)
             spacer = ctk.CTkFrame(self.sidebar, fg_color="transparent")
             spacer.pack(fill="both", expand=True)
+
+            # 하단 구분선
+            separator_bottom = ctk.CTkFrame(
+                self.sidebar,
+                height=1,
+                fg_color=palette.surface_elevated,
+            )
+            separator_bottom.pack(padx=PADDING_MD, pady=(PADDING_LG, PADDING_MD), fill="x")
 
             self.theme_btn = ctk.CTkButton(
                 self.sidebar,
@@ -209,7 +229,7 @@ def _create_app():
                 text_color=palette.text_primary,
                 hover_color=palette.button_hover,
             )
-            self.theme_btn.pack(padx=PADDING_MD, pady=(PADDING_MD, PADDING_XL), fill="x")
+            self.theme_btn.pack(padx=PADDING_MD, pady=(0, PADDING_XL), fill="x")
 
         def _create_main_area(self) -> None:
             """메인 콘텐츠 영역을 생성한다."""

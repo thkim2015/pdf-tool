@@ -9,8 +9,12 @@ import customtkinter as ctk
 from pdf_tool.gui.constants import (
     BORDER_RADIUS_DEFAULT,
     BUTTON_HEIGHT_DEFAULT,
+    FONT_LABEL,
+    INPUT_HEIGHT_DEFAULT,
     PADDING_LG,
     PADDING_MD,
+    SECTION_LABEL_PADDING,
+    SECTION_SPACING,
 )
 from pdf_tool.gui.theme import get_current_palette
 
@@ -23,11 +27,25 @@ class SplitPageWidget(BasePageWidget):
 
     def create_params_ui(self, parent: ctk.CTkFrame) -> None:
         """분할 파라미터 UI를 생성한다."""
-        label = ctk.CTkLabel(parent, text="N페이지마다 분할:")
-        label.pack(pady=(5, 0), padx=10, anchor="w")
+        palette = get_current_palette()
+        
+        label = ctk.CTkLabel(
+            parent,
+            text="N페이지마다 분할:",
+            text_color=palette.text_primary,
+            font=ctk.CTkFont(FONT_LABEL[0], FONT_LABEL[1], FONT_LABEL[2]),
+        )
+        label.pack(pady=SECTION_LABEL_PADDING, padx=PADDING_MD, anchor="w")
 
-        self.every_entry = ctk.CTkEntry(parent, placeholder_text="1")
-        self.every_entry.pack(pady=5, padx=10, fill="x")
+        self.every_entry = ctk.CTkEntry(
+            parent,
+            placeholder_text="1",
+            height=INPUT_HEIGHT_DEFAULT,
+            fg_color=palette.surface_elevated,
+            text_color=palette.text_primary,
+            placeholder_text_color=palette.text_tertiary,
+        )
+        self.every_entry.pack(pady=(0, SECTION_SPACING), padx=PADDING_MD, fill="x")
         self.every_entry.insert(0, "1")
 
     def execute_command(self, input_file: Path, output_path: Path):

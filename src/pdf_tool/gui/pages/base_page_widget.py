@@ -46,21 +46,28 @@ class BasePageWidget(ctk.CTkFrame):
         """공통 레이아웃을 생성한다."""
         palette = get_current_palette()
         
+        # 스크롤 가능한 컨테이너 (파라미터가 많을 때)
+        scroll_frame = ctk.CTkScrollableFrame(
+            self,
+            fg_color="transparent",
+        )
+        scroll_frame.pack(fill="both", expand=True, padx=0, pady=0)
+
         # 파일 선택 영역
         self.file_picker = FilePickerWidget(
-            self,
+            scroll_frame,
             on_file_selected=self._on_file_selected,
         )
         self.file_picker.pack(fill="x", padx=PADDING_MD, pady=PADDING_MD)
 
         # 파라미터 영역 (서브클래스에서 구현)
-        self.params_frame = ctk.CTkFrame(self)
+        self.params_frame = ctk.CTkFrame(scroll_frame, fg_color="transparent")
         self.params_frame.pack(fill="x", padx=PADDING_MD, pady=PADDING_MD)
         self.create_params_ui(self.params_frame)
 
         # 실행 버튼
         self.execute_btn = ctk.CTkButton(
-            self,
+            scroll_frame,
             text="실행",
             command=self._on_execute,
             state="disabled",
@@ -72,9 +79,9 @@ class BasePageWidget(ctk.CTkFrame):
         self.execute_btn.pack(pady=PADDING_LG, padx=PADDING_MD, fill="x")
 
         # 프로그레스 바
-        self.progress_bar = ProgressBarWidget(self)
+        self.progress_bar = ProgressBarWidget(scroll_frame)
 
-        # 결과 영역
+        # 결과 영역 (스크롤 밖에서 항상 표시)
         self.result_display = ResultDisplayWidget(self)
         self.result_display.pack(fill="both", expand=True, padx=PADDING_MD, pady=PADDING_MD)
 
