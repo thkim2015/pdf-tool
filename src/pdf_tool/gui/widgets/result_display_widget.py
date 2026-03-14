@@ -13,6 +13,8 @@ from typing import Any
 
 import customtkinter as ctk
 
+from pdf_tool.gui.constants import FONT_LABEL, FONT_SMALL, PADDING_MD
+from pdf_tool.gui.theme import get_current_palette
 from pdf_tool.gui.widgets.result_display import ResultState
 
 try:
@@ -39,15 +41,26 @@ class ResultDisplayWidget(ctk.CTkFrame):
     def __init__(self, master: ctk.CTkFrame, **kwargs) -> None:
         super().__init__(master, **kwargs)
 
+        palette = get_current_palette()
         self._state = ResultState()
 
         # 결과 메시지 레이블
-        self.message_label = ctk.CTkLabel(self, text="", wraplength=500)
-        self.message_label.pack(pady=5, padx=10, fill="x")
+        self.message_label = ctk.CTkLabel(
+            self,
+            text="",
+            wraplength=500,
+            font=ctk.CTkFont(FONT_LABEL[0], FONT_LABEL[1], FONT_LABEL[2]),
+        )
+        self.message_label.pack(pady=PADDING_MD, padx=PADDING_MD, fill="x")
 
         # 경로 레이블 (성공 시 출력 경로 표시)
-        self.path_label = ctk.CTkLabel(self, text="", text_color="gray")
-        self.path_label.pack(pady=2, padx=10, fill="x")
+        self.path_label = ctk.CTkLabel(
+            self,
+            text="",
+            text_color=palette.text_tertiary,
+            font=ctk.CTkFont(FONT_SMALL[0], FONT_SMALL[1], FONT_SMALL[2]),
+        )
+        self.path_label.pack(pady=PADDING_MD, padx=PADDING_MD, fill="x")
 
         # 정보 표시 프레임 (dict 결과용)
         self.info_frame = ctk.CTkFrame(self)
@@ -64,38 +77,49 @@ class ResultDisplayWidget(ctk.CTkFrame):
 
         output_path가 PDF이면 미리보기 썸네일도 표시한다.
         """
+        palette = get_current_palette()
         self._state.show_success(message, output_path)
         self._clear_info()
-        self.message_label.configure(text=message, text_color="green")
+        self.message_label.configure(
+            text=f"✓ {message}",
+            text_color=palette.success,
+        )
         self.path_label.configure(text=str(output_path))
         self.info_frame.pack_forget()
         self._start_preview(output_path)
 
     def show_error(self, message: str) -> None:
         """에러 결과를 표시한다."""
+        palette = get_current_palette()
         self._state.show_error(message)
         self._clear_info()
-        self.message_label.configure(text=message, text_color="red")
+        self.message_label.configure(
+            text=f"✗ {message}",
+            text_color=palette.error,
+        )
         self.path_label.configure(text="")
         self.info_frame.pack_forget()
         self._clear_preview()
 
     def show_info(self, data: dict[str, Any]) -> None:
         """정보(dict)를 키-값 테이블로 표시한다."""
+        palette = get_current_palette()
         self._state.show_info(data)
         self.message_label.configure(text="", text_color="gray")
         self.path_label.configure(text="")
         self._clear_info()
         self._clear_preview()
 
-        self.info_frame.pack(pady=5, padx=10, fill="both", expand=True)
+        self.info_frame.pack(pady=PADDING_MD, padx=PADDING_MD, fill="both", expand=True)
         for key, value in data.items():
             label = ctk.CTkLabel(
                 self.info_frame,
                 text=f"{key}: {value}",
                 anchor="w",
+                text_color=palette.text_secondary,
+                font=ctk.CTkFont(FONT_SMALL[0], FONT_SMALL[1], FONT_SMALL[2]),
             )
-            label.pack(padx=10, pady=2, fill="x")
+            label.pack(padx=PADDING_MD, pady=PADDING_MD, fill="x")
             self._info_labels.append(label)
 
     def clear(self) -> None:
@@ -122,7 +146,7 @@ class ResultDisplayWidget(ctk.CTkFrame):
         if not str(output_path).lower().endswith(".pdf"):
             return
 
-        self._preview_widget.pack(pady=5, padx=10, fill="x")
+        self._preview_widget.pack(pady=PADDING_MD, padx=PADDING_MD, fill="x")
         self._preview_widget.show_loading()
         render_id = self._preview_widget.next_render_id()
 

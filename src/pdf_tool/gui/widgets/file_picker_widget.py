@@ -12,6 +12,14 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.gui.constants import (
+    BORDER_RADIUS_DEFAULT,
+    BUTTON_HEIGHT_DEFAULT,
+    FONT_LABEL,
+    FONT_SMALL,
+    PADDING_MD,
+)
+from pdf_tool.gui.theme import get_current_palette
 from pdf_tool.gui.widgets.file_picker import get_pdf_info, is_valid_pdf_extension
 
 
@@ -39,21 +47,28 @@ class FilePickerWidget(ctk.CTkFrame):
 
     def _create_ui(self) -> None:
         """UI 컴포넌트를 생성한다."""
+        palette = get_current_palette()
+        
         # 파일 선택 버튼
         self.select_btn = ctk.CTkButton(
             self,
-            text="파일 선택...",
+            text="📁 파일 선택...",
             command=self._open_dialog,
+            height=BUTTON_HEIGHT_DEFAULT,
+            corner_radius=BORDER_RADIUS_DEFAULT,
+            fg_color=palette.primary,
+            hover_color=palette.button_hover,
         )
-        self.select_btn.pack(pady=5, padx=10, fill="x")
+        self.select_btn.pack(pady=PADDING_MD, padx=PADDING_MD, fill="x")
 
         # 파일 정보 레이블
         self.info_label = ctk.CTkLabel(
             self,
             text="파일을 선택하거나 드래그 앤 드롭하세요",
-            text_color="gray",
+            text_color=palette.text_tertiary,
+            font=ctk.CTkFont(FONT_SMALL[0], FONT_SMALL[1], FONT_SMALL[2]),
         )
-        self.info_label.pack(pady=5, padx=10)
+        self.info_label.pack(pady=PADDING_MD, padx=PADDING_MD)
 
     def _setup_drag_and_drop(self) -> None:
         """드래그 앤 드롭을 설정한다. tkinterdnd2가 없으면 무시한다."""
@@ -77,25 +92,27 @@ class FilePickerWidget(ctk.CTkFrame):
 
     def _try_select_file(self, path: Path) -> None:
         """파일을 선택하고 유효성을 검증한다."""
+        palette = get_current_palette()
+        
         if not is_valid_pdf_extension(path):
             self.info_label.configure(
-                text="PDF 파일만 선택할 수 있습니다",
-                text_color="red",
+                text="❌ PDF 파일만 선택할 수 있습니다",
+                text_color=palette.error,
             )
             return
 
         info = get_pdf_info(path)
         if info is None:
             self.info_label.configure(
-                text="PDF 파일을 읽을 수 없습니다",
-                text_color="red",
+                text="❌ PDF 파일을 읽을 수 없습니다",
+                text_color=palette.error,
             )
             return
 
         self._selected_file = path
         self.info_label.configure(
-            text=f"{info['name']} ({info['pages']}페이지)",
-            text_color=("gray10", "gray90"),
+            text=f"✓ {info['name']} ({info['pages']}페이지)",
+            text_color=palette.success,
         )
 
         if self._on_file_selected:

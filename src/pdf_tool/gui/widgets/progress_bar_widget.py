@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import customtkinter as ctk
 
+from pdf_tool.gui.constants import FONT_SMALL, PADDING_MD
+from pdf_tool.gui.theme import get_current_palette
 from pdf_tool.gui.widgets.progress_bar import ProgressState
 
 
@@ -19,16 +21,27 @@ class ProgressBarWidget(ctk.CTkFrame):
     def __init__(self, master: ctk.CTkFrame, **kwargs) -> None:
         super().__init__(master, **kwargs)
 
+        palette = get_current_palette()
         self._state = ProgressState()
 
         # 프로그레스 바
-        self.progress = ctk.CTkProgressBar(self, mode="indeterminate")
-        self.progress.pack(pady=5, padx=10, fill="x")
+        self.progress = ctk.CTkProgressBar(
+            self,
+            mode="indeterminate",
+            fg_color=palette.surface_elevated,
+            progress_color=palette.primary,
+        )
+        self.progress.pack(pady=PADDING_MD, padx=PADDING_MD, fill="x")
         self.progress.set(0)
 
         # 상태 메시지
-        self.status_label = ctk.CTkLabel(self, text="")
-        self.status_label.pack(pady=2, padx=10)
+        self.status_label = ctk.CTkLabel(
+            self,
+            text="",
+            text_color=palette.text_secondary,
+            font=ctk.CTkFont(FONT_SMALL[0], FONT_SMALL[1], FONT_SMALL[2]),
+        )
+        self.status_label.pack(pady=PADDING_MD, padx=PADDING_MD)
 
         # 초기에는 숨김
         self.pack_forget()
@@ -38,7 +51,7 @@ class ProgressBarWidget(ctk.CTkFrame):
         self._state.start(message)
         self.status_label.configure(text=message)
         self.progress.start()
-        self.pack(fill="x", padx=5, pady=5)
+        self.pack(fill="x", padx=PADDING_MD, pady=PADDING_MD)
 
     def stop(self) -> None:
         """프로그레스 바를 정지한다."""

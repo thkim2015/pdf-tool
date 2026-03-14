@@ -6,9 +6,24 @@ CustomTkinter 기반의 PDF 도구 GUI 진입점이다.
 from __future__ import annotations
 
 from pdf_tool.core.exceptions import PDFToolError
-
-# 사이드바 네비게이션 버튼 목록
-NAV_BUTTONS = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Info"]
+from pdf_tool.gui.constants import (
+    BORDER_RADIUS_DEFAULT,
+    BUTTON_HEIGHT_DEFAULT,
+    BUTTON_HEIGHT_LG,
+    FONT_LABEL_BOLD,
+    FONT_TITLE,
+    MAIN_PADX,
+    MAIN_PADY,
+    NAV_BUTTONS,
+    PADDING_LG,
+    PADDING_MD,
+    PADDING_XL,
+    SIDEBAR_WIDTH,
+    WINDOW_HEIGHT,
+    WINDOW_MIN_HEIGHT,
+    WINDOW_MIN_WIDTH,
+    WINDOW_WIDTH,
+)
 
 
 class PageManager:
@@ -91,7 +106,7 @@ def _create_app():
     from pdf_tool.gui.pages.rotate_page_widget import RotatePageWidget
     from pdf_tool.gui.pages.split_page_widget import SplitPageWidget
     from pdf_tool.gui.pages.watermark_page_widget import WatermarkPageWidget
-    from pdf_tool.gui.theme import DARK_MODE, apply_theme, toggle_theme
+    from pdf_tool.gui.theme import DARK_MODE, apply_theme, get_current_palette, toggle_theme
 
     # 페이지 이름과 위젯 클래스 매핑
     page_classes = {
@@ -108,18 +123,13 @@ def _create_app():
     class PDFToolApp(ctk.CTk):
         """PDF Tool GUI 메인 윈도우 클래스."""
 
-        # 윈도우 기본 크기
-        WINDOW_WIDTH = 900
-        WINDOW_HEIGHT = 650
-        SIDEBAR_WIDTH = 180
-
         def __init__(self) -> None:
             super().__init__()
 
             # 윈도우 설정
             self.title("PDF Tool")
-            self.geometry(f"{self.WINDOW_WIDTH}x{self.WINDOW_HEIGHT}")
-            self.minsize(800, 600)
+            self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
+            self.minsize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
 
             # 테마 적용
             apply_theme(DARK_MODE)
@@ -149,7 +159,15 @@ def _create_app():
 
         def _create_sidebar(self) -> None:
             """사이드바를 생성한다."""
-            self.sidebar = ctk.CTkFrame(self, width=self.SIDEBAR_WIDTH, corner_radius=0)
+            palette = get_current_palette()
+            
+            # 사이드바 배경색 사용
+            self.sidebar = ctk.CTkFrame(
+                self,
+                width=SIDEBAR_WIDTH,
+                corner_radius=0,
+                fg_color=palette.surface,
+            )
             self.sidebar.pack(side="left", fill="y")
             self.sidebar.pack_propagate(False)
 
@@ -157,9 +175,10 @@ def _create_app():
             title_label = ctk.CTkLabel(
                 self.sidebar,
                 text="PDF Tool",
-                font=ctk.CTkFont(size=20, weight="bold"),
+                font=ctk.CTkFont(FONT_TITLE[0], FONT_TITLE[1], FONT_TITLE[2]),
+                text_color=palette.text_primary,
             )
-            title_label.pack(padx=20, pady=(20, 20))
+            title_label.pack(padx=PADDING_LG, pady=(PADDING_XL, PADDING_LG))
 
             # 네비게이션 버튼 생성
             for name in NAV_BUTTONS:
@@ -167,10 +186,13 @@ def _create_app():
                     self.sidebar,
                     text=name,
                     command=lambda n=name: self._on_nav_click(n),
-                    height=35,
-                    corner_radius=8,
+                    height=BUTTON_HEIGHT_DEFAULT,
+                    corner_radius=BORDER_RADIUS_DEFAULT,
+                    fg_color=palette.surface_elevated,
+                    text_color=palette.text_primary,
+                    hover_color=palette.button_hover,
                 )
-                btn.pack(padx=15, pady=4, fill="x")
+                btn.pack(padx=PADDING_MD, pady=PADDING_MD, fill="x")
                 self._nav_buttons[name] = btn
 
             # 하단 영역: 테마 토글 버튼 (REQ-O-001)
@@ -179,17 +201,30 @@ def _create_app():
 
             self.theme_btn = ctk.CTkButton(
                 self.sidebar,
-                text="테마 전환",
+                text="🌙 테마 전환",
                 command=lambda: toggle_theme(),
-                height=30,
-                corner_radius=8,
+                height=BUTTON_HEIGHT_DEFAULT,
+                corner_radius=BORDER_RADIUS_DEFAULT,
+                fg_color=palette.secondary,
+                text_color=palette.text_primary,
+                hover_color=palette.button_hover,
             )
-            self.theme_btn.pack(padx=15, pady=(4, 15), fill="x")
+            self.theme_btn.pack(padx=PADDING_MD, pady=(PADDING_MD, PADDING_XL), fill="x")
 
         def _create_main_area(self) -> None:
             """메인 콘텐츠 영역을 생성한다."""
-            self.main_frame = ctk.CTkFrame(self)
-            self.main_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
+            palette = get_current_palette()
+            self.main_frame = ctk.CTkFrame(
+                self,
+                fg_color=palette.background,
+            )
+            self.main_frame.pack(
+                side="right",
+                fill="both",
+                expand=True,
+                padx=MAIN_PADX,
+                pady=MAIN_PADY,
+            )
 
         def _register_pages(self) -> None:
             """모든 작업 페이지를 생성하고 등록한다."""
@@ -212,11 +247,18 @@ def _create_app():
             Args:
                 active_name: 활성화할 버튼 이름
             """
+            palette = get_current_palette()
             for name, btn in self._nav_buttons.items():
                 if name == active_name:
-                    btn.configure(fg_color=("gray25", "gray75"))
+                    btn.configure(
+                        fg_color=palette.primary,
+                        text_color=("white", "white"),
+                    )
                 else:
-                    btn.configure(fg_color=("gray40", "gray55"))
+                    btn.configure(
+                        fg_color=palette.surface_elevated,
+                        text_color=palette.text_primary,
+                    )
 
         def _handle_exception(self, exc_type, exc_value, exc_tb) -> None:
             """처리되지 않은 예외를 잡아 메시지 박스로 표시한다."""

@@ -12,11 +12,18 @@ from pathlib import Path
 import customtkinter as ctk
 
 from pdf_tool.gui.app import format_exception_message
+from pdf_tool.gui.constants import (
+    BORDER_RADIUS_DEFAULT,
+    BUTTON_HEIGHT_DEFAULT,
+    PADDING_LG,
+    PADDING_MD,
+)
 from pdf_tool.gui.pages.base_page import (
     ExecutionState,
     generate_output_path,
     would_overwrite,
 )
+from pdf_tool.gui.theme import get_current_palette
 from pdf_tool.gui.widgets.file_picker_widget import FilePickerWidget
 from pdf_tool.gui.widgets.progress_bar_widget import ProgressBarWidget
 from pdf_tool.gui.widgets.result_display_widget import ResultDisplayWidget
@@ -37,16 +44,18 @@ class BasePageWidget(ctk.CTkFrame):
 
     def _create_layout(self) -> None:
         """공통 레이아웃을 생성한다."""
+        palette = get_current_palette()
+        
         # 파일 선택 영역
         self.file_picker = FilePickerWidget(
             self,
             on_file_selected=self._on_file_selected,
         )
-        self.file_picker.pack(fill="x", padx=10, pady=5)
+        self.file_picker.pack(fill="x", padx=PADDING_MD, pady=PADDING_MD)
 
         # 파라미터 영역 (서브클래스에서 구현)
         self.params_frame = ctk.CTkFrame(self)
-        self.params_frame.pack(fill="x", padx=10, pady=5)
+        self.params_frame.pack(fill="x", padx=PADDING_MD, pady=PADDING_MD)
         self.create_params_ui(self.params_frame)
 
         # 실행 버튼
@@ -55,15 +64,19 @@ class BasePageWidget(ctk.CTkFrame):
             text="실행",
             command=self._on_execute,
             state="disabled",
+            height=BUTTON_HEIGHT_DEFAULT,
+            corner_radius=BORDER_RADIUS_DEFAULT,
+            fg_color=palette.primary,
+            hover_color=palette.button_hover,
         )
-        self.execute_btn.pack(pady=10, padx=10, fill="x")
+        self.execute_btn.pack(pady=PADDING_LG, padx=PADDING_MD, fill="x")
 
         # 프로그레스 바
         self.progress_bar = ProgressBarWidget(self)
 
         # 결과 영역
         self.result_display = ResultDisplayWidget(self)
-        self.result_display.pack(fill="both", expand=True, padx=10, pady=5)
+        self.result_display.pack(fill="both", expand=True, padx=PADDING_MD, pady=PADDING_MD)
 
     def _on_file_selected(self, path: Path) -> None:
         """파일이 선택되었을 때 호출된다."""
