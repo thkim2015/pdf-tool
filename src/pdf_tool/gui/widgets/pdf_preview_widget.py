@@ -10,6 +10,9 @@ from pathlib import Path
 import customtkinter as ctk
 from PIL import Image
 
+from pdf_tool.gui.constants import FONT_SMALL, PADDING_MD
+from pdf_tool.gui.theme import get_current_palette
+
 try:
     from pdf_tool.gui.widgets.pdf_preview import open_pdf_in_viewer
 
@@ -27,6 +30,7 @@ class PdfPreviewWidget(ctk.CTkFrame):
     def __init__(self, master: ctk.CTkFrame, **kwargs) -> None:
         super().__init__(master, **kwargs)
 
+        palette = get_current_palette()
         self._render_id: int = 0
         self._ctk_image: ctk.CTkImage | None = None
         self._pdf_path: str | Path | None = None
@@ -35,7 +39,8 @@ class PdfPreviewWidget(ctk.CTkFrame):
         self._loading_label = ctk.CTkLabel(
             self,
             text="",
-            text_color="gray",
+            text_color=palette.text_tertiary,
+            font=ctk.CTkFont(FONT_SMALL[0], FONT_SMALL[1], FONT_SMALL[2]),
         )
 
         # 이미지 표시 레이블
@@ -43,8 +48,8 @@ class PdfPreviewWidget(ctk.CTkFrame):
 
     def show_loading(self) -> None:
         """'미리보기 로딩 중...' 텍스트를 표시한다."""
-        self._loading_label.configure(text="미리보기 로딩 중...")
-        self._loading_label.pack(pady=5)
+        self._loading_label.configure(text="⏳ 미리보기 로딩 중...")
+        self._loading_label.pack(pady=PADDING_MD)
         self._image_label.pack_forget()
 
     def show_preview(
@@ -69,7 +74,7 @@ class PdfPreviewWidget(ctk.CTkFrame):
         )
 
         self._image_label.configure(image=self._ctk_image, text="")
-        self._image_label.pack(pady=5)
+        self._image_label.pack(pady=PADDING_MD)
 
         # 클릭 시 시스템 뷰어로 열기
         if _preview_module_available:
