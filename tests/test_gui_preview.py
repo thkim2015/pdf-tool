@@ -10,6 +10,22 @@ import pytest
 from PIL import Image
 
 
+@pytest.fixture(autouse=True)
+def _inject_mock_pdfium():
+    """pypdfium2가 미설치일 때 mock pdfium을 모듈에 주입한다."""
+    import pdf_tool.gui.widgets.pdf_preview as mod
+
+    if not mod._pdfium_available:
+        mock_pdfium = MagicMock()
+        mod.pdfium = mock_pdfium
+        mod._pdfium_available = True
+        yield
+        del mod.pdfium
+        mod._pdfium_available = False
+    else:
+        yield
+
+
 class Test_render_first_page_정상:
     """render_first_page가 정상 PDF를 렌더링하는지 검증한다."""
 
@@ -131,11 +147,11 @@ class Test_is_preview_available:
     """pypdfium2 설치 여부에 따른 미리보기 가용성을 검증한다."""
 
     def test_is_preview_available_설치됨(self):
-        """pypdfium2가 설치되어 있으면 True를 반환한다."""
-        from pdf_tool.gui.widgets.pdf_preview import is_preview_available
+        """_pdfium_available이 True이면 True를 반환한다."""
+        import pdf_tool.gui.widgets.pdf_preview as mod
 
-        # 실제로 pypdfium2가 설치되어 있으므로 True
-        assert is_preview_available() is True
+        # fixture가 _pdfium_available = True로 설정해 줌
+        assert mod.is_preview_available() is True
 
     def test_is_preview_available_미설치(self):
         """pypdfium2가 없으면 False를 반환한다."""

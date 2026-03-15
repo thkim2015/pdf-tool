@@ -5,6 +5,7 @@ CustomTkinter 기반의 PDF 도구 GUI 진입점이다.
 
 from __future__ import annotations
 
+import logging
 import sys
 from collections.abc import Callable
 
@@ -102,6 +103,9 @@ class PageManager:
 
         if on_complete is not None:
             on_complete()
+
+
+logger = logging.getLogger(__name__)
 
 
 def format_exception_message(exc: Exception) -> str:
@@ -353,8 +357,9 @@ def _create_app():
                     )
 
         def _handle_exception(self, exc_type, exc_value, exc_tb) -> None:
-            """처리되지 않은 예외를 잡아 메시지 박스로 표시한다."""
+            """처리되지 않은 예외를 잡아 로그에 기록하고 메시지 박스로 표시한다."""
             msg = format_exception_message(exc_value)
+            logger.error("GUI 미처리 예외: %s: %s", exc_type.__name__, msg)
             mb.showerror("오류", msg)
 
         def _on_close(self) -> None:
@@ -369,8 +374,16 @@ def _create_app():
     return PDFToolApp()
 
 
+GUI_LOG_FILE = "pdf_tool_gui.log"
+
+
 def main() -> None:
     """GUI 애플리케이션 진입점."""
+    logging.basicConfig(
+        filename=GUI_LOG_FILE,
+        level=logging.ERROR,
+        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    )
     app = _create_app()
     app.mainloop()
 

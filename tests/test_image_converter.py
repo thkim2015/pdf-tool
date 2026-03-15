@@ -6,9 +6,8 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
-from pdf_tool.core.exceptions import FileValidationError, PDFProcessingError
+from pdf_tool.core.exceptions import FileValidationError
 from pdf_tool.core.image_converter import (
-    SUPPORTED_IMAGE_FORMATS,
     image_to_pdf,
     validate_image_file,
 )
@@ -132,7 +131,7 @@ class TestImageToPDF:
 
     def test_all_supported_formats(self, temp_dir):
         """지원하는 모든 이미지 포맷 테스트."""
-        output_pdf = temp_dir / "output.pdf"
+        temp_dir / "output.pdf"
 
         # PNG, JPG, BMP, TIFF 이미지 생성 및 변환 테스트
         test_formats = [

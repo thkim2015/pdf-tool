@@ -6,6 +6,7 @@ Quick Look 스타일 (둥근 모서리, 그림자) 적용.
 
 from __future__ import annotations
 
+import contextlib
 from pathlib import Path
 
 import customtkinter as ctk
@@ -118,7 +119,12 @@ class PdfPreviewWidget(ctk.CTkFrame):
         self._render_id += 1
         self._loading_label.configure(text="")
         self._loading_label.pack_forget()
-        self._image_label.configure(image=None, text="")
+        # CTkImage 해제 전에 내부 tkinter Label의 이미지 참조를 제거한다.
+        # CTkLabel.configure(image=None)은 내부 Label의 참조를 제거하지 않으므로
+        # 직접 내부 _label 위젯의 이미지를 빈 문자열로 설정한다.
+        if self._ctk_image is not None:
+            with contextlib.suppress(AttributeError, Exception):
+                self._image_label._label.configure(image="")
         self._image_label.pack_forget()
         self._ctk_image = None
         self._pdf_path = None

@@ -1,17 +1,10 @@
 """Image to PDF 변환 기능: 이미지 파일을 PDF로 변환한다."""
 
 import os
-import sys
 from pathlib import Path
 
-# reportlab이 tkinter를 사용하지 않도록 모든 관련 환경변수 비활성화
+# reportlab이 tkinter를 사용하지 않도록 환경변수 비활성화
 os.environ["PILLOW_DISABLE_TKINTER"] = "1"
-
-# tkinter 모듈이 로드되지 않도록 차단
-# (이미 로드됐으면 sys.modules에 있음)
-if "tkinter" not in sys.modules:
-    sys.modules["tkinter"] = None
-    sys.modules["_tkinter"] = None
 
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
@@ -68,7 +61,6 @@ def image_to_pdf(
         FileValidationError: 이미지 파일이 유효하지 않을 때
         PDFProcessingError: PDF 생성 중 오류가 발생할 때
     """
-    import gc
 
     # 입력 경로 정규화
     if isinstance(image_paths, Path):
@@ -99,6 +91,8 @@ def image_to_pdf(
         raise
     except Exception as exc:
         raise PDFProcessingError(f"PDF 생성 중 오류 발생: {exc}") from exc
+    finally:
+        pass
 
 
 def _add_image_to_pdf(
@@ -116,10 +110,10 @@ def _add_image_to_pdf(
     Raises:
         PDFProcessingError: 이미지 추가 중 오류가 발생할 때
     """
+    import sys
     from io import BytesIO
 
     from reportlab.pdfgen import canvas as rl_canvas
-    from reportlab.lib.pagesizes import letter
 
     try:
         # 이미지 로드 및 변환 (PIL 컨텍스트 내에서만)
@@ -151,40 +145,23 @@ def _add_image_to_pdf(
 
             # 임시 PDF로 이미지 변환
             pdf_buffer = BytesIO()
-            c = rl_canvas.Canvas(pdf_buffer, pagesize=(page_width, page_height))
 
-            # PIL Image 객체를 직접 drawImage에 전달
-            # (reportlab은 PIL Image를 받을 수 있음)
+            # reportlab canvas 생성 전에 tkinter 차단
+            # 이는 drawImage() 호출 시 PhotoImage 레지스트리 충돌을 방지함
+            tkinter_saved = sys.modules.get("tkinter")
+            _tkinter_saved = sys.modules.get("_tkinter")
+            sys.modules["tkinter"] = None
+            sys.modules["_tkinter"] = None
+
             try:
-                if keep_aspect_ratio:
-                    c.drawImage(
-                        img,
-                        0,
-                        0,
-                        width=page_width,
-                        height=page_height,
-                        preserveAspectRatio=True,
-                    )
-                else:
-                    c.drawImage(
-                        img,
-                        0,
-                        0,
-                        width=page_width,
-                        height=page_height,
-                        preserveAspectRatio=False,
-                    )
-            except Exception as e:
-                # PIL Image 객체가 작동하지 않으면 임시 파일 사용
-                import tempfile
-                with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-                    temp_path = tmp.name
-                    img.save(temp_path, "JPEG", quality=95)
+                c = rl_canvas.Canvas(pdf_buffer, pagesize=(page_width, page_height))
 
+                # PIL Image 객체를 직접 drawImage에 전달
+                # (reportlab은 PIL Image를 받을 수 있음)
                 try:
                     if keep_aspect_ratio:
                         c.drawImage(
-                            temp_path,
+                            img,
                             0,
                             0,
                             width=page_width,
@@ -193,25 +170,61 @@ def _add_image_to_pdf(
                         )
                     else:
                         c.drawImage(
-                            temp_path,
+                            img,
                             0,
                             0,
                             width=page_width,
                             height=page_height,
                             preserveAspectRatio=False,
                         )
-                finally:
-                    Path(temp_path).unlink(missing_ok=True)
+                except Exception:
+                    # PIL Image 객체가 작동하지 않으면 임시 파일 사용
+                    import tempfile
+                    with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+                        temp_path = tmp.name
+                        img.save(temp_path, "JPEG", quality=95)
 
-            c.save()
-            pdf_buffer.seek(0)
+                    try:
+                        if keep_aspect_ratio:
+                            c.drawImage(
+                                temp_path,
+                                0,
+                                0,
+                                width=page_width,
+                                height=page_height,
+                                preserveAspectRatio=True,
+                            )
+                        else:
+                            c.drawImage(
+                                temp_path,
+                                0,
+                                0,
+                                width=page_width,
+                                height=page_height,
+                                preserveAspectRatio=False,
+                            )
+                    finally:
+                        Path(temp_path).unlink(missing_ok=True)
 
-            # 생성된 PDF를 메인 PDF에 추가
-            temp_pdf = PdfReader(pdf_buffer)
-            pdf_writer.add_page(temp_pdf.pages[0])
+                c.save()
+                pdf_buffer.seek(0)
 
-            # 버퍼 정리
-            pdf_buffer.close()
+                # 생성된 PDF를 메인 PDF에 추가
+                temp_pdf = PdfReader(pdf_buffer)
+                pdf_writer.add_page(temp_pdf.pages[0])
+
+                # 버퍼 정리
+                pdf_buffer.close()
+            finally:
+                # tkinter 모듈 복원
+                if tkinter_saved is not None:
+                    sys.modules["tkinter"] = tkinter_saved
+                else:
+                    sys.modules.pop("tkinter", None)
+                if _tkinter_saved is not None:
+                    sys.modules["_tkinter"] = _tkinter_saved
+                else:
+                    sys.modules.pop("_tkinter", None)
 
         finally:
             # PIL 이미지 객체 명시적 정리

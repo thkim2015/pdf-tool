@@ -69,6 +69,9 @@ def _build_gui_cmd(root: Path) -> list[str]:
         "--hidden-import", "reportlab.lib.pagesizes",
         "--hidden-import", "PIL",
         "--hidden-import", "PIL.Image",
+        "--hidden-import", "pypdfium2",
+        "--hidden-import", "darkdetect",
+        "--hidden-import", "tkinterdnd2",
         str(root / "pdf_tool_gui_entry.py"),
     ]
 

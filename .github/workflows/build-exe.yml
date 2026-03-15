@@ -25,14 +25,21 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra build
 
+      - name: Run tests
+        run: uv run pytest tests/ -x -q --ignore=tests/test_gui_preview.py --ignore=tests/test_gui_error_log.py
+
       - name: Build CLI EXE
         run: uv run python build_exe.py --mode cli
+
+      - name: Verify CLI EXE
+        run: dist\pdf-tool.exe --version
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: pdf-tool-cli-windows
           path: dist/pdf-tool.exe
+          retention-days: 30
 
   build-gui:
     runs-on: windows-latest
@@ -57,6 +64,7 @@ jobs:
         with:
           name: pdf-tool-gui-windows
           path: dist/pdf-tool-gui.exe
+          retention-days: 30
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')

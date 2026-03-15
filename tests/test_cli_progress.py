@@ -46,7 +46,7 @@ class TestCliProgressBar:
 
             create(output, 100)
 
-            result = runner.invoke(
+            runner.invoke(
                 app,
                 [
                     "rotate",
@@ -74,7 +74,7 @@ class TestCliProgressBar:
 
             _create_pdf(output, 1)
 
-            result = runner.invoke(
+            runner.invoke(
                 app,
                 [
                     "cut",

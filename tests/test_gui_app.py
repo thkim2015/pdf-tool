@@ -9,7 +9,10 @@ class Test_네비게이션_버튼:
     def test_네비게이션_버튼_목록(self):
         from pdf_tool.gui.constants import NAV_BUTTONS
 
-        expected = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Images to PDF", "Info"]
+        expected = [
+            "Cut", "Merge", "Split", "Rotate", "Resize",
+            "Compress", "Watermark", "Images to PDF", "Info",
+        ]
         assert expected == NAV_BUTTONS
 
     def test_네비게이션_버튼_수(self):
