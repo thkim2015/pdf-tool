@@ -6,6 +6,7 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.core.progress import ProgressCallback
 from pdf_tool.gui.pages.base_page_widget import BasePageWidget
 from pdf_tool.gui.pages.cut_page import run_cut
 from pdf_tool.gui.widgets.page_range_input_widget import PageRangeInputWidget
@@ -22,7 +23,9 @@ class CutPageWidget(BasePageWidget):
         self.page_range_input = PageRangeInputWidget(parent)
         self.page_range_input.pack(fill="x")
 
-    def execute_command(self, input_file: Path, output_path: Path):
+    def execute_command(
+        self, input_file: Path, output_path: Path, callback: ProgressCallback = None,
+    ):
         """잘라내기를 실행한다."""
         pages = self.page_range_input.get_value()
-        return run_cut(input_file, pages, output_path)
+        return run_cut(input_file, pages, output_path, callback=callback)

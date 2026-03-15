@@ -8,6 +8,7 @@ from pypdf import PdfReader, PdfWriter
 from pdf_tool.core.exceptions import PDFProcessingError
 from pdf_tool.core.page_range import parse_page_range
 from pdf_tool.core.pdf_handler import load_pdf
+from pdf_tool.core.progress import ProgressCallback, safe_callback
 from pdf_tool.core.validators import validate_output_path
 from pdf_tool.core.watermark_generator import (
     create_image_watermark,
@@ -26,6 +27,7 @@ def watermark_pdf(
     rotation: float = 45,
     position: str = "center",
     pages: str | None = None,
+    callback: ProgressCallback = None,
 ) -> Path:
     """PDF에 워터마크를 적용한다.
 
@@ -38,6 +40,7 @@ def watermark_pdf(
         rotation: 회전 각도 (기본값 45도, 텍스트만 적용)
         position: 위치 ("center", "top", "bottom")
         pages: 적용할 페이지 범위 (예: "1,3,5-10")
+        callback: 진행 상황 콜백 (current, total)
 
     Returns:
         출력 파일 경로
@@ -66,6 +69,7 @@ def watermark_pdf(
     else:
         target_indices = set(range(total_pages))
 
+    total_pages = len(reader.pages)
     writer = PdfWriter()
 
     for i, page in enumerate(reader.pages):
@@ -108,6 +112,7 @@ def watermark_pdf(
             wm_path.unlink(missing_ok=True)
 
         writer.add_page(page)
+        safe_callback(callback, i + 1, total_pages)
 
     # 메타데이터 복사
     if reader.metadata:

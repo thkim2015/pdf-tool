@@ -47,7 +47,7 @@ class FilePickerWidget(ctk.CTkFrame):
     def _create_ui(self) -> None:
         """UI 컴포넌트를 생성한다."""
         palette = get_current_palette()
-        
+
         # 파일 선택 버튼
         self.select_btn = ctk.CTkButton(
             self,
@@ -92,7 +92,7 @@ class FilePickerWidget(ctk.CTkFrame):
     def _try_select_file(self, path: Path) -> None:
         """파일을 선택하고 유효성을 검증한다."""
         palette = get_current_palette()
-        
+
         if not is_valid_pdf_extension(path):
             self.info_label.configure(
                 text="❌ PDF 파일만 선택할 수 있습니다",

@@ -7,6 +7,7 @@ from pypdf import PdfWriter
 from pdf_tool.core.exceptions import PDFToolError
 from pdf_tool.core.page_range import parse_page_range
 from pdf_tool.core.pdf_handler import load_pdf, save_pdf
+from pdf_tool.core.progress import ProgressCallback, safe_callback
 from pdf_tool.utils.file_utils import generate_output_filename
 
 # 지원하는 회전 각도
@@ -19,6 +20,7 @@ def rotate_pdf(
     angle: int,
     pages: str | None = None,
     output: Path | None = None,
+    callback: ProgressCallback = None,
 ) -> Path:
     """PDF 페이지를 시계 방향으로 회전한다.
 
@@ -27,6 +29,7 @@ def rotate_pdf(
         angle: 회전 각도 (90, 180, 270)
         pages: 회전할 페이지 범위 (None이면 전체 페이지)
         output: 출력 파일 경로 (None이면 자동 생성)
+        callback: 진행 상황 콜백 (current, total)
 
     Returns:
         생성된 출력 파일 경로
@@ -57,6 +60,7 @@ def rotate_pdf(
         if i in target_indices:
             page = page.rotate(angle)
         writer.add_page(page)
+        safe_callback(callback, i + 1, total_pages)
 
     save_pdf(writer, output)
     return output

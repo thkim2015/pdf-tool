@@ -7,6 +7,7 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.core.progress import ProgressCallback
 from pdf_tool.gui.constants import (
     BORDER_RADIUS_DEFAULT,
     BUTTON_HEIGHT_DEFAULT,
@@ -365,7 +366,9 @@ class ImageToPdfPageWidget(BasePageWidget):
         )
         thread.start()
 
-    def execute_command(self, input_file: Path, output_path: Path):
+    def execute_command(
+        self, input_file: Path, output_path: Path, callback: ProgressCallback = None,
+    ):
         """이미지를 PDF로 변환한다.
 
         Note: input_file 파라미터는 BasePageWidget 호환성을 위해 받지만,

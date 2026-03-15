@@ -6,6 +6,7 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.core.progress import ProgressCallback
 from pdf_tool.gui.constants import FONT_SMALL, PADDING_MD
 from pdf_tool.gui.pages.base_page_widget import BasePageWidget
 from pdf_tool.gui.pages.compress_page import run_compress
@@ -29,9 +30,11 @@ class CompressPageWidget(BasePageWidget):
         )
         label.pack(pady=PADDING_MD)
 
-    def execute_command(self, input_file: Path, output_path: Path):
+    def execute_command(
+        self, input_file: Path, output_path: Path, callback: ProgressCallback = None,
+    ):
         """압축을 실행한다."""
-        result = run_compress(input_file, output_path)
+        result = run_compress(input_file, output_path, callback=callback)
         return result
 
     def _on_success(self, result, output_path: Path) -> None:

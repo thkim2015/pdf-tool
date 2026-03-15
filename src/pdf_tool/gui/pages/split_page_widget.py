@@ -6,6 +6,7 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.core.progress import ProgressCallback
 from pdf_tool.gui.constants import (
     FONT_LABEL,
     INPUT_HEIGHT_DEFAULT,
@@ -47,11 +48,13 @@ class SplitPageWidget(BasePageWidget):
         self.every_entry.pack(pady=(0, SECTION_SPACING), padx=PADDING_MD, fill="x")
         self.every_entry.insert(0, "1")
 
-    def execute_command(self, input_file: Path, output_path: Path):
+    def execute_command(
+        self, input_file: Path, output_path: Path, callback: ProgressCallback = None,
+    ):
         """분할을 실행한다."""
         every = int(self.every_entry.get() or "1")
         output_dir = input_file.parent
-        return run_split(input_file, every, output_dir)
+        return run_split(input_file, every, output_dir, callback=callback)
 
     def _on_success(self, result, output_path: Path) -> None:
         """분할 결과 파일 목록을 표시한다."""
