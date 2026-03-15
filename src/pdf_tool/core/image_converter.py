@@ -145,7 +145,7 @@ def _add_image_to_pdf(
                 x = 0
                 y = 0
                 c.drawImage(
-                    image_path,
+                    str(image_path),
                     x,
                     y,
                     width=img_width,
@@ -154,7 +154,7 @@ def _add_image_to_pdf(
                 )
             else:
                 c.drawImage(
-                    image_path,
+                    str(image_path),
                     0,
                     0,
                     width=page_width,
