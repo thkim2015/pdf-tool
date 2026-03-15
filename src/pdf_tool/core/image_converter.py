@@ -109,18 +109,19 @@ def _add_image_to_pdf(
     Raises:
         PDFProcessingError: 이미지 추가 중 오류가 발생할 때
     """
-    import tempfile
     from io import BytesIO
 
-    from reportlab.pdfgen import canvas
+    from reportlab.pdfgen import canvas as rl_canvas
+    from reportlab.lib.pagesizes import letter
 
-    temp_file = None
     try:
-        # 이미지 로드 및 변환
-        with Image.open(image_path) as img:
+        # 이미지 로드 및 변환 (PIL 컨텍스트 내에서만)
+        img = None
+        try:
+            img = Image.open(image_path)
+
             # RGBA를 RGB로 변환 (PDF에서 투명도 미지원)
             if img.mode in ("RGBA", "LA", "P"):
-                # 투명도 없는 이미지로 변환
                 background = Image.new("RGB", img.size, (255, 255, 255))
                 if img.mode == "P":
                     img = img.convert("RGBA")
@@ -141,52 +142,77 @@ def _add_image_to_pdf(
             else:
                 page_width, page_height = a4_width, a4_height
 
-            # 이미지를 임시 JPEG 파일로 저장 (GUI 환경에서 캐시 방지)
-            with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
-                temp_file = tmp.name
-                img.save(temp_file, "JPEG", quality=95)
-
             # 임시 PDF로 이미지 변환
-            buffer = BytesIO()
-            c = canvas.Canvas(buffer, pagesize=(page_width, page_height))
+            pdf_buffer = BytesIO()
+            c = rl_canvas.Canvas(pdf_buffer, pagesize=(page_width, page_height))
 
-            # 임시 파일 경로로 drawImage 호출
-            if keep_aspect_ratio:
-                c.drawImage(
-                    temp_file,
-                    0,
-                    0,
-                    width=page_width,
-                    height=page_height,
-                    preserveAspectRatio=True,
-                )
-            else:
-                c.drawImage(
-                    temp_file,
-                    0,
-                    0,
-                    width=page_width,
-                    height=page_height,
-                    preserveAspectRatio=False,
-                )
+            # PIL Image 객체를 직접 drawImage에 전달
+            # (reportlab은 PIL Image를 받을 수 있음)
+            try:
+                if keep_aspect_ratio:
+                    c.drawImage(
+                        img,
+                        0,
+                        0,
+                        width=page_width,
+                        height=page_height,
+                        preserveAspectRatio=True,
+                    )
+                else:
+                    c.drawImage(
+                        img,
+                        0,
+                        0,
+                        width=page_width,
+                        height=page_height,
+                        preserveAspectRatio=False,
+                    )
+            except Exception as e:
+                # PIL Image 객체가 작동하지 않으면 임시 파일 사용
+                import tempfile
+                with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+                    temp_path = tmp.name
+                    img.save(temp_path, "JPEG", quality=95)
+
+                try:
+                    if keep_aspect_ratio:
+                        c.drawImage(
+                            temp_path,
+                            0,
+                            0,
+                            width=page_width,
+                            height=page_height,
+                            preserveAspectRatio=True,
+                        )
+                    else:
+                        c.drawImage(
+                            temp_path,
+                            0,
+                            0,
+                            width=page_width,
+                            height=page_height,
+                            preserveAspectRatio=False,
+                        )
+                finally:
+                    Path(temp_path).unlink(missing_ok=True)
 
             c.save()
-            buffer.seek(0)
+            pdf_buffer.seek(0)
 
             # 생성된 PDF를 메인 PDF에 추가
-            temp_pdf = PdfReader(buffer)
+            temp_pdf = PdfReader(pdf_buffer)
             pdf_writer.add_page(temp_pdf.pages[0])
-            buffer.close()
+
+            # 버퍼 정리
+            pdf_buffer.close()
+
+        finally:
+            # PIL 이미지 객체 명시적 정리
+            if img is not None:
+                img.close()
 
     except Exception as exc:
         raise PDFProcessingError(f"이미지 처리 중 오류 발생 ({image_path}): {exc}") from exc
-    finally:
-        # 임시 파일 정리
-        if temp_file and Path(temp_file).exists():
-            try:
-                Path(temp_file).unlink()
-            except Exception:
-                pass
 
 
 def _calculate_page_size(
