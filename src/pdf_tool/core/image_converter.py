@@ -1,10 +1,17 @@
 """Image to PDF 변환 기능: 이미지 파일을 PDF로 변환한다."""
 
 import os
+import sys
 from pathlib import Path
 
-# GUI 환경에서 tkinter ImageTk 라이브러리 비활성화
+# reportlab이 tkinter를 사용하지 않도록 모든 관련 환경변수 비활성화
 os.environ["PILLOW_DISABLE_TKINTER"] = "1"
+
+# tkinter 모듈이 로드되지 않도록 차단
+# (이미 로드됐으면 sys.modules에 있음)
+if "tkinter" not in sys.modules:
+    sys.modules["tkinter"] = None
+    sys.modules["_tkinter"] = None
 
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
