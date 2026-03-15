@@ -103,91 +103,73 @@ def _add_image_to_pdf(
     Raises:
         PDFProcessingError: 이미지 추가 중 오류가 발생할 때
     """
-    import gc
     from io import BytesIO
 
     from reportlab.pdfgen import canvas
 
-    buffer = None
     try:
-        processed_img = None
+        # 이미지 로드 및 변환
         with Image.open(image_path) as img:
             # RGBA를 RGB로 변환 (PDF에서 투명도 미지원)
             if img.mode in ("RGBA", "LA", "P"):
                 # 투명도 없는 이미지로 변환
                 background = Image.new("RGB", img.size, (255, 255, 255))
                 if img.mode == "P":
-                    temp_img = img.convert("RGBA")
-                    background.paste(temp_img, mask=temp_img.split()[-1])
-                    temp_img.close()
-                else:
-                    background.paste(img, mask=img.split()[-1] if img.mode == "RGBA" else None)
-                processed_img = background
+                    img = img.convert("RGBA")
+                background.paste(img, mask=img.split()[-1] if img.mode == "RGBA" else None)
+                img = background
             elif img.mode not in ("RGB", "L"):
-                processed_img = img.convert("RGB")
+                img = img.convert("RGB")
+
+            # A4 크기로 정렬 (약 210mm x 297mm, 72dpi 기준)
+            a4_width = 595  # 포인트 단위
+            a4_height = 842
+
+            # 이미지 크기에 맞춘 페이지 크기 계산
+            if keep_aspect_ratio:
+                page_width, page_height = _calculate_page_size(
+                    img.width, img.height, a4_width, a4_height
+                )
             else:
-                # 이미지 복사본 생성 (with 블록 외부에서도 접근 가능)
-                processed_img = img.copy()
+                page_width, page_height = a4_width, a4_height
 
-        # A4 크기로 정렬 (약 210mm x 297mm, 72dpi 기준)
-        a4_width = 595  # 포인트 단위
-        a4_height = 842
+            # 임시 PDF로 이미지 변환 (BytesIO에 직접 쓰기)
+            buffer = BytesIO()
+            c = canvas.Canvas(buffer, pagesize=(page_width, page_height))
 
-        # 이미지 크기에 맞춘 페이지 크기 계산
-        if keep_aspect_ratio:
-            page_width, page_height = _calculate_page_size(
-                processed_img.width, processed_img.height, a4_width, a4_height
-            )
-        else:
-            page_width, page_height = a4_width, a4_height
+            # 이미지를 페이지 크기에 맞게 그리기
+            img_width = page_width
+            img_height = page_height
 
-        # 임시 PDF로 이미지 변환
-        buffer = BytesIO()
-        c = canvas.Canvas(buffer, pagesize=(page_width, page_height))
+            if keep_aspect_ratio:
+                c.drawImage(
+                    str(image_path),
+                    0,
+                    0,
+                    width=img_width,
+                    height=img_height,
+                    preserveAspectRatio=True,
+                )
+            else:
+                c.drawImage(
+                    str(image_path),
+                    0,
+                    0,
+                    width=page_width,
+                    height=page_height,
+                    preserveAspectRatio=False,
+                )
 
-        # 이미지를 페이지 크기에 맞게 그리기
-        img_width = page_width
-        img_height = page_height
+            c.save()
+            buffer.seek(0)
 
-        if keep_aspect_ratio:
-            # 이미지를 페이지 중앙에 배치
-            x = 0
-            y = 0
-            c.drawImage(
-                str(image_path),
-                x,
-                y,
-                width=img_width,
-                height=img_height,
-                preserveAspectRatio=True,
-            )
-        else:
-            c.drawImage(
-                str(image_path),
-                0,
-                0,
-                width=page_width,
-                height=page_height,
-                preserveAspectRatio=False,
-            )
-
-        c.save()
-        buffer.seek(0)
-
-        # 생성된 PDF를 메인 PDF에 추가
-        temp_pdf = PdfReader(buffer)
-        pdf_writer.add_page(temp_pdf.pages[0])
+            # 생성된 PDF를 메인 PDF에 추가
+            temp_pdf = PdfReader(buffer)
+            pdf_writer.add_page(temp_pdf.pages[0])
+            buffer.close()
 
     except Exception as exc:
         raise PDFProcessingError(f"이미지 처리 중 오류 발생 ({image_path}): {exc}") from exc
-    finally:
-        # 리소스 정리
-        if buffer is not None:
-            buffer.close()
-        if processed_img is not None:
-            processed_img.close()
-        # 가비지 컬렉션 강제 실행
-        gc.collect()
 
 
 def _calculate_page_size(
