@@ -15,12 +15,15 @@ from pdf_tool.gui.theme import get_current_palette
 class CompressPageWidget(BasePageWidget):
     """Compress 페이지 위젯. 추가 파라미터 없음."""
 
+    page_title = "압축"
+    action_button_text = "압축"
+
     def create_params_ui(self, parent: ctk.CTkFrame) -> None:
         """파라미터 UI 없음 (압축은 별도 설정 불필요)."""
         palette = get_current_palette()
         label = ctk.CTkLabel(
             parent,
-            text="ℹ️ PDF를 압축합니다. (크기 감소, 품질 유지)",
+            text="PDF를 압축합니다. (크기 감소, 품질 유지)",
             text_color=palette.text_secondary,
             font=ctk.CTkFont(FONT_SMALL[0], FONT_SMALL[1], FONT_SMALL[2]),
         )

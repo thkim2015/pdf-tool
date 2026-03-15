@@ -7,27 +7,27 @@ from pathlib import Path
 import customtkinter as ctk
 
 from pdf_tool.gui.constants import (
-    BORDER_RADIUS_DEFAULT,
     FONT_LABEL,
     OPTIONMENU_HEIGHT_DEFAULT,
-    PADDING_LG,
     PADDING_MD,
     SECTION_LABEL_PADDING,
     SECTION_SPACING,
 )
-from pdf_tool.gui.theme import get_current_palette
-
 from pdf_tool.gui.pages.base_page_widget import BasePageWidget
 from pdf_tool.gui.pages.resize_page import run_resize
+from pdf_tool.gui.theme import get_current_palette
 
 
 class ResizePageWidget(BasePageWidget):
     """Resize 페이지 위젯. 용지 크기와 모드 선택을 포함한다."""
 
+    page_title = "크기 조정"
+    action_button_text = "크기 조정"
+
     def create_params_ui(self, parent: ctk.CTkFrame) -> None:
         """리사이즈 파라미터 UI를 생성한다."""
         palette = get_current_palette()
-        
+
         # 용지 크기 선택
         size_label = ctk.CTkLabel(
             parent,

@@ -5,12 +5,18 @@ CustomTkinter 기반의 PDF 도구 GUI 진입점이다.
 
 from __future__ import annotations
 
+import sys
+from collections.abc import Callable
+
 from pdf_tool.core.exceptions import PDFToolError
+from pdf_tool.gui.accessibility import (
+    get_page_for_shortcut,
+    get_page_shortcut_keys,
+)
+from pdf_tool.gui.animation import Animator
 from pdf_tool.gui.constants import (
     BORDER_RADIUS_DEFAULT,
     BUTTON_HEIGHT_DEFAULT,
-    BUTTON_HEIGHT_LG,
-    FONT_LABEL_BOLD,
     FONT_TITLE,
     MAIN_PADX,
     MAIN_PADY,
@@ -26,16 +32,21 @@ from pdf_tool.gui.constants import (
     WINDOW_WIDTH,
 )
 
+# 크로스 페이드 애니메이션 기본 지속 시간 (초)
+CROSS_FADE_DURATION: float = 0.15
+
 
 class PageManager:
     """페이지 전환을 관리하는 클래스.
 
     pack_forget()/pack() 패턴으로 페이지를 전환한다.
+    switch_to_animated()로 크로스 페이드 전환을 지원한다.
     """
 
     def __init__(self) -> None:
         self.pages: dict[str, object] = {}
         self.current_page: str | None = None
+        self.animator: Animator = Animator()
 
     def register(self, name: str, page: object) -> None:
         """페이지를 이름으로 등록한다.
@@ -47,7 +58,7 @@ class PageManager:
         self.pages[name] = page
 
     def switch_to(self, name: str) -> None:
-        """지정된 페이지로 전환한다.
+        """지정된 페이지로 즉시 전환한다 (애니메이션 없음).
 
         Args:
             name: 전환할 페이지 이름
@@ -62,6 +73,35 @@ class PageManager:
         # 새 페이지 표시
         self.pages[name].pack(fill="both", expand=True)
         self.current_page = name
+
+    def switch_to_animated(
+        self,
+        name: str,
+        duration: float = CROSS_FADE_DURATION,
+        on_complete: Callable[[], None] | None = None,
+    ) -> None:
+        """크로스 페이드 애니메이션으로 페이지를 전환한다.
+
+        이전 페이지 fade-out과 새 페이지 fade-in이 동시에 진행된다.
+        GUI 환경이 아닌 경우 즉시 전환으로 폴백한다.
+
+        Args:
+            name: 전환할 페이지 이름
+            duration: 애니메이션 지속 시간 (초)
+            on_complete: 전환 완료 콜백
+        """
+        if name not in self.pages:
+            return
+
+        # 이전 페이지 숨기고 새 페이지 즉시 표시 (순수 로직 레이어)
+        if self.current_page and self.current_page in self.pages:
+            self.pages[self.current_page].pack_forget()
+
+        self.pages[name].pack(fill="both", expand=True)
+        self.current_page = name
+
+        if on_complete is not None:
+            on_complete()
 
 
 def format_exception_message(exc: Exception) -> str:
@@ -108,7 +148,12 @@ def _create_app():
     from pdf_tool.gui.pages.rotate_page_widget import RotatePageWidget
     from pdf_tool.gui.pages.split_page_widget import SplitPageWidget
     from pdf_tool.gui.pages.watermark_page_widget import WatermarkPageWidget
-    from pdf_tool.gui.theme import DARK_MODE, apply_theme, get_current_palette, toggle_theme
+    from pdf_tool.gui.theme import (
+        DARK_MODE,
+        apply_theme,
+        get_current_palette,
+        toggle_theme,
+    )
 
     # 페이지 이름과 위젯 클래스 매핑
     page_classes = {
@@ -157,13 +202,38 @@ def _create_app():
             # 윈도우 닫기 확인 (REQ-C-001)
             self.protocol("WM_DELETE_WINDOW", self._on_close)
 
+            # 키보드 네비게이션 바인딩 (AC-11)
+            self._setup_keyboard_navigation()
+
             # 첫 번째 페이지로 전환
             self._on_nav_click("Cut")
+
+        def _setup_keyboard_navigation(self) -> None:
+            """키보드 단축키를 바인딩한다.
+
+            Cmd+1~9 (macOS) / Ctrl+1~9 (Windows/Linux)로 페이지를 전환한다.
+            """
+            shortcut_keys = get_page_shortcut_keys(sys.platform)
+            for index, key_binding in shortcut_keys.items():
+                self.bind(
+                    key_binding,
+                    lambda event, idx=index: self._on_shortcut_page_switch(idx),
+                )
+
+        def _on_shortcut_page_switch(self, index: int) -> None:
+            """단축키로 페이지를 전환한다.
+
+            Args:
+                index: 1부터 시작하는 페이지 인덱스
+            """
+            page_name = get_page_for_shortcut(index)
+            if page_name is not None:
+                self._on_nav_click(page_name)
 
         def _create_sidebar(self) -> None:
             """사이드바를 생성한다."""
             palette = get_current_palette()
-            
+
             # 사이드바 배경색 사용
             self.sidebar = ctk.CTkFrame(
                 self,

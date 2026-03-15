@@ -226,7 +226,7 @@ wheels = [
 
 [[package]]
 name = "pdf-tool"
-version = "0.1.0"
+version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "pillow" },
@@ -247,6 +247,7 @@ dev = [
 ]
 gui = [
     { name = "customtkinter" },
+    { name = "darkdetect" },
     { name = "pypdfium2" },
     { name = "tkinterdnd2" },
 ]
@@ -254,6 +255,7 @@ gui = [
 [package.metadata]
 requires-dist = [
     { name = "customtkinter", marker = "extra == 'gui'", specifier = ">=5.2.0" },
+    { name = "darkdetect", marker = "extra == 'gui'", specifier = ">=0.8.0" },
     { name = "pillow", specifier = ">=12.1.1" },
     { name = "pyinstaller", marker = "extra == 'build'", specifier = ">=6.0.0" },
     { name = "pypdf", specifier = ">=6.8.0" },

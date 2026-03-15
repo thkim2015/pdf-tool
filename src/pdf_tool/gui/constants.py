@@ -1,6 +1,7 @@
 """GUI 상수 정의 모듈.
 
-윈도우 크기, 패딩, 폰트 등 UI 관련 상수를 중앙에서 관리한다.
+Apple Human Interface Guidelines 기반 윈도우 크기, 패딩, 폰트 등 UI 관련 상수를 중앙에서 관리한다.
+8pt 그리드, Apple Dynamic Type 스케일을 사용한다.
 """
 
 from __future__ import annotations
@@ -20,43 +21,43 @@ SIDEBAR_WIDTH = 200
 SIDEBAR_VISIBLE = True
 
 # 메인 컨텐츠 영역 패딩
-MAIN_PADX = 12
-MAIN_PADY = 12
+MAIN_PADX = 16  # 8pt 그리드 기반 (2 * 8)
+MAIN_PADY = 16  # 8pt 그리드 기반 (2 * 8)
 
 
 # ============================================================================
-# 스페이싱 및 패딩 (4px 단위)
+# 스페이싱 및 패딩 (8pt 그리드)
 # ============================================================================
 
-PADDING_UNIT = 4
+PADDING_UNIT = 8
 
-# 기본 패딩 (단위: px)
-PADDING_XS = PADDING_UNIT      # 4px
-PADDING_SM = PADDING_UNIT * 2  # 8px
-PADDING_MD = PADDING_UNIT * 3  # 12px
-PADDING_LG = PADDING_UNIT * 4  # 16px
-PADDING_XL = PADDING_UNIT * 5  # 20px
-PADDING_2XL = PADDING_UNIT * 6 # 24px
+# 기본 패딩 (8pt 그리드 배수)
+PADDING_XS = PADDING_UNIT          # 8pt
+PADDING_SM = PADDING_UNIT * 2      # 16pt
+PADDING_MD = PADDING_UNIT * 3      # 24pt
+PADDING_LG = PADDING_UNIT * 4      # 32pt
+PADDING_XL = PADDING_UNIT * 5      # 40pt
+PADDING_2XL = PADDING_UNIT * 6     # 48pt
 
 # 일반적인 간격
-PADX_DEFAULT = PADDING_MD      # 12px
-PADY_DEFAULT = PADDING_SM      # 8px
+PADX_DEFAULT = PADDING_SM          # 16pt
+PADY_DEFAULT = PADDING_XS          # 8pt
 
 # 섹션 간격
-SECTION_SPACING = PADDING_LG   # 16px
+SECTION_SPACING = PADDING_LG       # 32pt
 
 # 요소 간 간격
-ELEMENT_SPACING = PADDING_SM   # 8px
+ELEMENT_SPACING = PADDING_XS       # 8pt
 
 
 # ============================================================================
-# 테두리 반지름 (모서리 둥글기)
+# 테두리 반지름 (Apple HIG: 6/10/14pt)
 # ============================================================================
 
 BORDER_RADIUS_NONE = 0
-BORDER_RADIUS_SM = 4
-BORDER_RADIUS_MD = 8     # 기본값
-BORDER_RADIUS_LG = 12
+BORDER_RADIUS_SM = 6       # Apple Small
+BORDER_RADIUS_MD = 10      # Apple Medium
+BORDER_RADIUS_LG = 14      # Apple Large
 BORDER_RADIUS_FULL = 20
 
 # 기본 테두리 반지름
@@ -76,10 +77,10 @@ BUTTON_HEIGHT_LG = 44
 BUTTON_HEIGHT_DEFAULT = BUTTON_HEIGHT_MD
 
 # 버튼 가로 패딩
-BUTTON_PADX = PADDING_MD
+BUTTON_PADX = PADDING_SM
 
 # 버튼 세로 패딩
-BUTTON_PADY = PADDING_SM
+BUTTON_PADY = PADDING_XS
 
 
 # ============================================================================
@@ -98,35 +99,35 @@ INPUT_BORDER_WIDTH = 1
 
 # 옵션 메뉴 및 기타 컨트롤 높이
 OPTIONMENU_HEIGHT_DEFAULT = BUTTON_HEIGHT_DEFAULT
-RADIOBUTTON_PADX = PADDING_MD
-RADIOBUTTON_PADY = PADDING_SM
+RADIOBUTTON_PADX = PADDING_SM
+RADIOBUTTON_PADY = PADDING_XS
 
 # 섹션 및 그룹 스타일
 SECTION_PADDING = PADDING_LG
-SECTION_LABEL_PADDING = (PADDING_MD, 0)
-SUBSECTION_PADDING = PADDING_MD
-ITEM_SPACING = PADDING_SM
+SECTION_LABEL_PADDING = (PADDING_SM, 0)
+SUBSECTION_PADDING = PADDING_SM
+ITEM_SPACING = PADDING_XS
 
 
 # ============================================================================
-# Typography (폰트)
+# Typography (Apple Dynamic Type 스케일)
 # ============================================================================
 
-# 기본 폰트 이름 (시스템 기본값 또는 지정)
+# 기본 폰트 이름
 FONT_FAMILY_DEFAULT = "System"
 FONT_FAMILY_MONO = "Menlo"  # macOS 또는 "Courier New" (Windows)
 
-# 제목 폰트 크기
-FONT_SIZE_H1 = 28
-FONT_SIZE_H2 = 24
-FONT_SIZE_H3 = 20
-FONT_SIZE_TITLE = 18   # 페이지 제목
+# 제목 폰트 크기 (Apple Dynamic Type)
+FONT_SIZE_H1 = 34     # Apple Large Title
+FONT_SIZE_H2 = 28     # Apple Title 1
+FONT_SIZE_H3 = 22     # Apple Title 2
+FONT_SIZE_TITLE = 20  # Apple Title 3
 
-# 본문 폰트 크기
-FONT_SIZE_BASE = 13    # 기본 텍스트
-FONT_SIZE_SM = 12
-FONT_SIZE_XS = 11
-FONT_SIZE_LG = 14
+# 본문 폰트 크기 (Apple Dynamic Type)
+FONT_SIZE_BASE = 17   # Apple Body
+FONT_SIZE_SM = 15     # Apple Subheadline
+FONT_SIZE_XS = 13     # Apple Footnote
+FONT_SIZE_LG = 16     # Apple Callout
 
 # 폰트 가중치
 FONT_WEIGHT_NORMAL = "normal"
@@ -180,7 +181,10 @@ PROGRESS_ANIMATION_MS = 50
 # ============================================================================
 
 # 네비게이션 버튼 이름
-NAV_BUTTONS = ["Cut", "Merge", "Split", "Rotate", "Resize", "Compress", "Watermark", "Images to PDF", "Info"]
+NAV_BUTTONS = [
+    "Cut", "Merge", "Split", "Rotate", "Resize",
+    "Compress", "Watermark", "Images to PDF", "Info",
+]
 
 # 네비게이션 버튼 개수
 NAV_BUTTON_COUNT = len(NAV_BUTTONS)
