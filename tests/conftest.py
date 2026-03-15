@@ -51,7 +51,7 @@ def twelve_page_pdf(tmp_path: Path) -> Path:
 def invalid_pdf(tmp_path: Path) -> Path:
     """유효하지 않은 PDF 파일 (텍스트 파일)을 생성한다."""
     path = tmp_path / "not_a_pdf.txt"
-    path.write_text("이것은 PDF가 아닙니다")
+    path.write_text("이것은 PDF가 아닙니다", encoding="utf-8")
     return path
 
 
