@@ -105,6 +105,7 @@ def _add_image_to_pdf(
     """
     from io import BytesIO
 
+    from reportlab.lib.utils import ImageReader
     from reportlab.pdfgen import canvas
 
     try:
@@ -133,26 +134,26 @@ def _add_image_to_pdf(
             else:
                 page_width, page_height = a4_width, a4_height
 
-            # 임시 PDF로 이미지 변환 (BytesIO에 직접 쓰기)
+            # ImageReader를 사용하여 tkinter PhotoImage 회피
+            img_reader = ImageReader(str(image_path))
+
+            # 임시 PDF로 이미지 변환
             buffer = BytesIO()
             c = canvas.Canvas(buffer, pagesize=(page_width, page_height))
 
-            # 이미지를 페이지 크기에 맞게 그리기
-            img_width = page_width
-            img_height = page_height
-
+            # reportlab의 drawImage 메서드 사용 (ImageReader 사용)
             if keep_aspect_ratio:
                 c.drawImage(
-                    str(image_path),
+                    img_reader,
                     0,
                     0,
-                    width=img_width,
-                    height=img_height,
+                    width=page_width,
+                    height=page_height,
                     preserveAspectRatio=True,
                 )
             else:
                 c.drawImage(
-                    str(image_path),
+                    img_reader,
                     0,
                     0,
                     width=page_width,
