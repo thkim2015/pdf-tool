@@ -92,7 +92,7 @@ DARK_PALETTE = ColorPalette(
     sidebar_selected="#0A84FF",  # 사이드바 선택 (Apple Blue)
 
     # vibrancy
-    vibrancy_bg="#1C1C1ECC",  # 80% 불투명도 시뮬레이션
+    vibrancy_bg="#1C1C1E",  # vibrancy 배경 (다크)
 )
 
 # 라이트모드 팔레트 (Apple HIG 기반)
@@ -133,7 +133,7 @@ LIGHT_PALETTE = ColorPalette(
     sidebar_selected="#007AFF",  # 사이드바 선택 (Apple Blue)
 
     # vibrancy
-    vibrancy_bg="#F2F2F7CC",  # 80% 불투명도 시뮬레이션
+    vibrancy_bg="#F2F2F7",  # vibrancy 배경 (라이트)
 )
 
 
