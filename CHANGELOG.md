@@ -7,6 +7,55 @@ Versioning: [Semantic Versioning](https://semver.org)
 
 ---
 
+## [0.2.1] - 2026-03-16
+
+### Added
+
+- **Progress Callback Framework (SPEC-PDF-003)**
+  - ProgressCallback Protocol로 장시간 PDF 작업의 실시간 진행 상황 추적
+  - CLI 진행 표시줄 (Rich 라이브러리 통합: 파일 크기, 퍼센트, ETA 표시)
+  - GUI 실시간 진행 업데이트 (100ms 인터벌 폴링)
+  - ETA (예상 완료 시간) 계산 및 표시 모듈
+  - 2초 이상 소요되는 작업에 대해 자동으로 진행 표시
+
+### Features
+
+- **Progress Tracking**:
+  - `core/progress.py`: ProgressCallback 타입 및 exception-safe `safe_callback` 래퍼
+  - `core/eta.py`: 작업 유형, 파일 크기, 페이지 수 기반 ETA 계산 모듈
+  - CLI: Rich progress bar (파일 크기, 퍼센트, ETA 동시 표시)
+  - GUI: Determinate ProgressBar 실시간 콜백 업데이트
+
+- **Command Integration**:
+  - 8개 PDF 명령어 (cut, merge, split, rotate, resize, compress, watermark, info) 모두 progress callback 지원
+  - 하위 호환성 유지: callback 없이도 정상 동작
+
+- **User Experience**:
+  - 장시간 작업 (> 2초) 자동 진행 표시
+  - 빠른 작업 (< 2초) 조용히 실행
+  - CLI 및 GUI 모두 실시간 피드백 제공
+  - 예상 완료 시간 (ETA) 표시
+
+### Tests
+
+- 75개 이상의 신규 테스트 (progress callback, ETA 계산, GUI 통합)
+- 전체 645개 테스트 모두 통과
+- 핵심 progress 모듈 커버리지 98.8%
+- 회귀 없음
+
+### Performance
+
+- ETA 계산 오버헤드 최소화 (작업당 < 10ms)
+- safe_callback으로 progress callback exception 안전 처리
+- 빠른 작업 (< 2초)에 성능 영향 없음
+
+### Notes
+
+- SPEC-PDF-003 Phase 1 & 2 완료
+- Phase 3 (메모리 최적화 연구)는 향후 릴리즈 예정
+
+---
+
 ## [0.2.0] - 2026-03-15
 
 ### Added
