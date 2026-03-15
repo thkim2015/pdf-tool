@@ -6,6 +6,7 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.core.progress import ProgressCallback
 from pdf_tool.gui.constants import (
     FONT_LABEL,
     OPTIONMENU_HEIGHT_DEFAULT,
@@ -55,8 +56,10 @@ class RotatePageWidget(BasePageWidget):
         )
         self.page_range_input.pack(fill="x", padx=PADDING_MD, pady=(0, SECTION_SPACING))
 
-    def execute_command(self, input_file: Path, output_path: Path):
+    def execute_command(
+        self, input_file: Path, output_path: Path, callback: ProgressCallback = None,
+    ):
         """회전을 실행한다."""
         angle = int(self.angle_var.get())
         pages = self.page_range_input.get_value() or None
-        return run_rotate(input_file, angle, pages, output_path)
+        return run_rotate(input_file, angle, pages, output_path, callback=callback)

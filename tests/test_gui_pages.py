@@ -52,7 +52,7 @@ class Test_CompressPage_로직:
             }
             result = run_compress(Path("/tmp/test.pdf"), Path("/tmp/test_compressed.pdf"))
             mock_cmd.assert_called_once_with(
-                Path("/tmp/test.pdf"), output=Path("/tmp/test_compressed.pdf")
+                Path("/tmp/test.pdf"), output=Path("/tmp/test_compressed.pdf"), callback=None,
             )
             assert result["reduction_percent"] == 50.0
 
@@ -72,6 +72,7 @@ class Test_CutPage_로직:
                 Path("/tmp/test.pdf"),
                 pages="1-3,5",
                 output=Path("/tmp/test_cut.pdf"),
+                callback=None,
             )
             assert result == Path("/tmp/test_cut.pdf")
 
@@ -94,6 +95,7 @@ class Test_RotatePage_로직:
                 angle=90,
                 pages=None,
                 output=Path("/tmp/test_rotated.pdf"),
+                callback=None,
             )
 
     def test_특정_페이지_회전(self):
@@ -110,6 +112,7 @@ class Test_RotatePage_로직:
                 angle=180,
                 pages="1,3",
                 output=Path("/tmp/test_rotated.pdf"),
+                callback=None,
             )
 
 
@@ -131,6 +134,7 @@ class Test_SplitPage_로직:
                 Path("/tmp/test.pdf"),
                 every=2,
                 output_dir=Path("/tmp/out"),
+                callback=None,
             )
             assert len(result) == 2
 
@@ -153,6 +157,7 @@ class Test_ResizePage_로직:
                 size="A4",
                 mode="fit",
                 output=Path("/tmp/test_resized.pdf"),
+                callback=None,
             )
 
 
@@ -204,6 +209,7 @@ class Test_WatermarkPage_로직:
                 rotation=45.0,
                 position="center",
                 pages=None,
+                callback=None,
             )
 
     def test_이미지_워터마크(self):
@@ -231,6 +237,7 @@ class Test_WatermarkPage_로직:
                 rotation=0.0,
                 position="center",
                 pages="1-3",
+                callback=None,
             )
 
 

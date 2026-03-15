@@ -7,6 +7,7 @@ from pypdf import PdfWriter, Transformation
 from pdf_tool.core.exceptions import PDFProcessingError
 from pdf_tool.core.page_sizes import get_paper_size, get_supported_sizes, mm_to_points
 from pdf_tool.core.pdf_handler import load_pdf
+from pdf_tool.core.progress import ProgressCallback, safe_callback
 from pdf_tool.core.validators import validate_output_path
 from pdf_tool.utils.file_utils import generate_output_filename
 
@@ -19,6 +20,7 @@ def resize_pdf(
     width_mm: float | None = None,
     height_mm: float | None = None,
     mode: str = "fit",
+    callback: ProgressCallback = None,
 ) -> Path:
     """PDF 페이지 크기를 변경한다.
 
@@ -29,6 +31,7 @@ def resize_pdf(
         width_mm: 커스텀 너비 (mm)
         height_mm: 커스텀 높이 (mm)
         mode: 리사이즈 모드 ("fit", "stretch", "fill")
+        callback: 진행 상황 콜백 (current, total)
 
     Returns:
         출력 파일 경로
@@ -49,10 +52,12 @@ def resize_pdf(
 
     validate_output_path(output)
 
+    total_pages = len(reader.pages)
     writer = PdfWriter()
 
-    for page in reader.pages:
+    for i, page in enumerate(reader.pages):
         _resize_page(writer, page, target_width, target_height, mode)
+        safe_callback(callback, i + 1, total_pages)
 
     # 메타데이터 복사
     if reader.metadata:

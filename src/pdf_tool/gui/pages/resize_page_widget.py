@@ -6,6 +6,7 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.core.progress import ProgressCallback
 from pdf_tool.gui.constants import (
     FONT_LABEL,
     OPTIONMENU_HEIGHT_DEFAULT,
@@ -64,6 +65,14 @@ class ResizePageWidget(BasePageWidget):
         )
         self.mode_menu.pack(pady=(0, SECTION_SPACING), padx=PADDING_MD, fill="x")
 
-    def execute_command(self, input_file: Path, output_path: Path):
+    def execute_command(
+        self, input_file: Path, output_path: Path, callback: ProgressCallback = None,
+    ):
         """크기 변경을 실행한다."""
-        return run_resize(input_file, self.size_var.get(), self.mode_var.get(), output_path)
+        return run_resize(
+            input_file,
+            self.size_var.get(),
+            self.mode_var.get(),
+            output_path,
+            callback=callback,
+        )

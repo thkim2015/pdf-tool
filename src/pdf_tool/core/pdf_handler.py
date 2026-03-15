@@ -4,14 +4,20 @@ from pathlib import Path
 
 from pypdf import PdfReader, PdfWriter
 
+from pdf_tool.core.progress import ProgressCallback
 from pdf_tool.core.validators import validate_output_path, validate_pdf_file
 
 
-def load_pdf(path: Path) -> PdfReader:
+def load_pdf(
+    path: Path,
+    *,
+    callback: ProgressCallback = None,
+) -> PdfReader:
     """PDF 파일을 읽어 PdfReader 객체를 반환한다.
 
     Args:
         path: PDF 파일 경로
+        callback: 진행 상황 콜백 (current, total)
 
     Returns:
         PdfReader 인스턴스

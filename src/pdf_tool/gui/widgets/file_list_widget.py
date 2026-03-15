@@ -46,7 +46,7 @@ class FileListWidget(ctk.CTkFrame):
     def _create_ui(self) -> None:
         """UI 컴포넌트를 생성한다."""
         palette = get_current_palette()
-        
+
         # 파일 추가 버튼
         self.add_btn = ctk.CTkButton(
             self,
@@ -92,7 +92,7 @@ class FileListWidget(ctk.CTkFrame):
     def _create_item(self, index: int, file_path: Path) -> ctk.CTkFrame:
         """파일 목록 항목 위젯을 생성한다."""
         palette = get_current_palette()
-        
+
         frame = ctk.CTkFrame(
             self.list_frame,
             fg_color=palette.surface_elevated,

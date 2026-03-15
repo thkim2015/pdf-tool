@@ -1,14 +1,12 @@
 """Image to PDF 변환 기능: 이미지 파일을 PDF로 변환한다."""
 
 from pathlib import Path
-from typing import List, Union
 
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
 
 from pdf_tool.core.exceptions import FileValidationError, PDFProcessingError
 from pdf_tool.core.validators import validate_output_path
-
 
 # 지원하는 이미지 포맷
 SUPPORTED_IMAGE_FORMATS = {".jpg", ".jpeg", ".png", ".bmp", ".tiff", ".tif"}
@@ -41,7 +39,7 @@ def validate_image_file(path: Path) -> None:
 
 
 def image_to_pdf(
-    image_paths: Union[Path, List[Path]],
+    image_paths: Path | list[Path],
     output_path: Path,
     keep_aspect_ratio: bool = True,
 ) -> None:
@@ -108,7 +106,6 @@ def _add_image_to_pdf(
     try:
         from io import BytesIO
 
-        from reportlab.lib.pagesizes import letter
         from reportlab.pdfgen import canvas
 
         with Image.open(image_path) as img:

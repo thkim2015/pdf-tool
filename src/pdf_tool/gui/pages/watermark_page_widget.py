@@ -7,6 +7,7 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.core.progress import ProgressCallback
 from pdf_tool.gui.constants import (
     BUTTON_HEIGHT_DEFAULT,
     FONT_LABEL,
@@ -200,7 +201,9 @@ class WatermarkPageWidget(BasePageWidget):
             self._image_path = Path(file_path)
             self.image_label.configure(text=self._image_path.name)
 
-    def execute_command(self, input_file: Path, output_path: Path):
+    def execute_command(
+        self, input_file: Path, output_path: Path, callback: ProgressCallback = None,
+    ):
         """워터마크를 적용한다."""
         wm_type = self.type_var.get()
         text = self.text_entry.get() if wm_type == "text" else None
@@ -216,4 +219,5 @@ class WatermarkPageWidget(BasePageWidget):
             rotation=self.rotation_var.get(),
             position=self.position_var.get(),
             pages=pages,
+            callback=callback,
         )

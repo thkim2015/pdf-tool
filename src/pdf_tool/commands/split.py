@@ -1,10 +1,12 @@
 """PDF 분할(Split) 명령: PDF를 페이지별 또는 단위별로 나누어 여러 파일을 생성한다."""
 
+import math
 from pathlib import Path
 
 from pypdf import PdfWriter
 
 from pdf_tool.core.pdf_handler import load_pdf
+from pdf_tool.core.progress import ProgressCallback, safe_callback
 from pdf_tool.utils.logging import print_warning
 
 
@@ -13,6 +15,7 @@ def split_pdf(
     *,
     every: int = 1,
     output_dir: Path | None = None,
+    callback: ProgressCallback = None,
 ) -> list[Path]:
     """PDF 파일을 지정된 단위로 분할한다.
 
@@ -20,6 +23,7 @@ def split_pdf(
         input_file: 입력 PDF 파일 경로
         every: 분할 단위 (기본값: 1, 페이지별 분할)
         output_dir: 출력 디렉토리 경로 (None이면 입력 파일과 같은 디렉토리)
+        callback: 진행 상황 콜백 (current, total)
 
     Returns:
         생성된 출력 파일 경로 목록
@@ -41,6 +45,7 @@ def split_pdf(
     if every > total_pages:
         print_warning(f"분할 단위({every})가 총 페이지({total_pages})보다 큽니다")
 
+    total_chunks = math.ceil(total_pages / every)
     result_files: list[Path] = []
     file_num = 1
 
@@ -56,6 +61,7 @@ def split_pdf(
             writer.write(f)
 
         result_files.append(output_path)
+        safe_callback(callback, file_num, total_chunks)
         file_num += 1
 
     return result_files

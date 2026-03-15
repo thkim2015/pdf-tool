@@ -1,8 +1,15 @@
 """Typer CLI 진입점: 모든 PDF 조작 명령어를 등록하고 공통 옵션을 관리한다."""
 
+# @MX:NOTE: SPEC-PDF-003 Phase 2 - CLI Rich Progress Bar 통합
+# @MX:SPEC: SPEC-PDF-003
+
+from __future__ import annotations
+
+import contextlib
 import json
+from collections.abc import Generator
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import typer
 from pypdf import PdfReader
@@ -16,7 +23,9 @@ from pdf_tool.commands.resize import resize_pdf
 from pdf_tool.commands.rotate import rotate_pdf
 from pdf_tool.commands.split import split_pdf
 from pdf_tool.commands.watermark import watermark_pdf
+from pdf_tool.core.eta import estimate_operation_time, should_show_progress
 from pdf_tool.core.exceptions import PDFToolError
+from pdf_tool.core.progress import ProgressCallback
 from pdf_tool.utils.logging import (
     print_error,
     print_info,
@@ -30,6 +39,91 @@ app = typer.Typer(
     help="PDF 조작 도구 (Cut, Merge, Split, Rotate, Resize, Compress, Watermark, Info)",
     add_completion=False,
 )
+
+
+# ============================================================================
+# Progress 헬퍼 함수
+# ============================================================================
+
+
+def create_progress_callback(progress: Any, task_id: Any) -> ProgressCallback:
+    """Rich Progress의 task를 업데이트하는 콜백을 생성한다.
+
+    Args:
+        progress: Rich Progress 인스턴스
+        task_id: Rich Progress의 task ID
+
+    Returns:
+        (current, total) -> None 형태의 콜백
+    """
+
+    def _callback(current: int, total: int) -> None:
+        progress.update(task_id, completed=current, total=total)
+
+    return _callback
+
+
+def _get_page_count(input_file: Path) -> int:
+    """PDF 파일의 페이지 수를 반환한다."""
+    try:
+        reader = PdfReader(input_file)
+        return len(reader.pages)
+    except Exception:
+        return 0
+
+
+@contextlib.contextmanager
+def _progress_context(
+    operation: str,
+    description: str,
+    page_count: int,
+    file_size_bytes: int = 0,
+) -> Generator[ProgressCallback]:
+    """조건부 Rich progress bar 컨텍스트 매니저.
+
+    추정 시간이 2초 이상이면 Rich progress bar를 표시하고,
+    그렇지 않으면 callback=None을 반환한다.
+
+    Args:
+        operation: 작업 유형 (cut, merge 등)
+        description: progress bar 설명
+        page_count: 페이지 수
+        file_size_bytes: 파일 크기 (바이트)
+
+    Yields:
+        ProgressCallback 또는 None
+    """
+    estimated = estimate_operation_time(
+        page_count=page_count,
+        operation=operation,
+        file_size_bytes=file_size_bytes,
+    )
+
+    if not should_show_progress(estimated):
+        yield None
+        return
+
+    from rich.progress import (
+        BarColumn,
+        MofNCompleteColumn,
+        Progress,
+        TextColumn,
+        TimeRemainingColumn,
+    )
+
+    with Progress(
+        TextColumn("[bold blue]{task.description}"),
+        BarColumn(),
+        MofNCompleteColumn(),
+        TimeRemainingColumn(),
+    ) as progress:
+        task_id = progress.add_task(description, total=page_count)
+        yield create_progress_callback(progress, task_id)
+
+
+# ============================================================================
+# CLI 명령어
+# ============================================================================
 
 
 def _version_callback(value: bool) -> None:
@@ -75,7 +169,11 @@ def cut(
             print_info(f"입력 파일: {input_file}")
             print_info(f"페이지 범위: {pages}")
 
-        result = cut_pdf(input_file, pages=pages, output=output)
+        page_count = _get_page_count(input_file)
+        file_size = input_file.stat().st_size if input_file.exists() else 0
+
+        with _progress_context("cut", "페이지 추출", page_count, file_size) as callback:
+            result = cut_pdf(input_file, pages=pages, output=output, callback=callback)
 
         reader = PdfReader(result)
         print_success("페이지 추출 완료")
@@ -110,7 +208,11 @@ def merge(
         if verbose:
             print_info(f"입력 파일: {len(input_files)}개")
 
-        result = merge_pdfs(input_files, output=output, use_glob=use_glob)
+        total_pages = sum(_get_page_count(f) for f in input_files if f.exists())
+        total_size = sum(f.stat().st_size for f in input_files if f.exists())
+
+        with _progress_context("merge", "PDF 병합", total_pages, total_size) as callback:
+            result = merge_pdfs(input_files, output=output, use_glob=use_glob, callback=callback)
 
         reader = PdfReader(result)
         print_success("PDF 병합 완료")
@@ -146,7 +248,13 @@ def split(
             print_info(f"입력 파일: {input_file}")
             print_info(f"분할 단위: {every}페이지")
 
-        result_files = split_pdf(input_file, every=every, output_dir=output_dir)
+        page_count = _get_page_count(input_file)
+        file_size = input_file.stat().st_size if input_file.exists() else 0
+
+        with _progress_context("split", "PDF 분할", page_count, file_size) as callback:
+            result_files = split_pdf(
+                input_file, every=every, output_dir=output_dir, callback=callback
+            )
 
         print_success("PDF 분할 완료")
         print_summary(
@@ -185,7 +293,13 @@ def rotate(
             print_info(f"입력 파일: {input_file}")
             print_info(f"회전 각도: {angle}도")
 
-        result = rotate_pdf(input_file, angle=angle, pages=pages, output=output)
+        page_count = _get_page_count(input_file)
+        file_size = input_file.stat().st_size if input_file.exists() else 0
+
+        with _progress_context("rotate", "페이지 회전", page_count, file_size) as callback:
+            result = rotate_pdf(
+                input_file, angle=angle, pages=pages, output=output, callback=callback
+            )
 
         reader = PdfReader(result)
         print_success("페이지 회전 완료")
@@ -234,14 +348,14 @@ def resize(
         if verbose:
             print_info(f"입력 파일: {input_file}")
 
-        result = resize_pdf(
-            input_file,
-            output=output,
-            size=size,
-            width_mm=width,
-            height_mm=height,
-            mode=mode,
-        )
+        page_count = _get_page_count(input_file)
+        file_size = input_file.stat().st_size if input_file.exists() else 0
+
+        with _progress_context("resize", "페이지 리사이즈", page_count, file_size) as callback:
+            result = resize_pdf(
+                input_file, output=output, size=size,
+                width_mm=width, height_mm=height, mode=mode, callback=callback,
+            )
 
         reader = PdfReader(result)
         print_success("페이지 리사이즈 완료")
@@ -274,7 +388,11 @@ def compress(
         if verbose:
             print_info(f"입력 파일: {input_file}")
 
-        result = compress_pdf(input_file, output=output)
+        page_count = _get_page_count(input_file)
+        file_size = input_file.stat().st_size if input_file.exists() else 0
+
+        with _progress_context("compress", "PDF 압축", page_count, file_size) as callback:
+            result = compress_pdf(input_file, output=output, callback=callback)
 
         original_mb = result["original_size"] / (1024 * 1024)
         compressed_mb = result["compressed_size"] / (1024 * 1024)
@@ -337,16 +455,15 @@ def watermark(
         if verbose:
             print_info(f"입력 파일: {input_file}")
 
-        result = watermark_pdf(
-            input_file,
-            output=output,
-            text=text,
-            image=image,
-            opacity=opacity,
-            rotation=rotation,
-            position=position,
-            pages=pages,
-        )
+        page_count = _get_page_count(input_file)
+        file_size = input_file.stat().st_size if input_file.exists() else 0
+
+        with _progress_context("watermark", "워터마크 적용", page_count, file_size) as callback:
+            result = watermark_pdf(
+                input_file, output=output, text=text, image=image,
+                opacity=opacity, rotation=rotation, position=position,
+                pages=pages, callback=callback,
+            )
 
         reader = PdfReader(result)
         wm_type = "텍스트" if text else "이미지"

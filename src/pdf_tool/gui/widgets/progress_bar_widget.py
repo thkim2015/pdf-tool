@@ -47,11 +47,37 @@ class ProgressBarWidget(ctk.CTkFrame):
         self.pack_forget()
 
     def start(self, message: str = "처리 중...") -> None:
-        """프로그레스 바를 시작한다."""
+        """indeterminate 모드로 프로그레스 바를 시작한다."""
         self._state.start(message)
+        self.progress.configure(mode="indeterminate")
         self.status_label.configure(text=message)
         self.progress.start()
         self.pack(fill="x", padx=PADDING_MD, pady=PADDING_MD)
+
+    def start_determinate(self, total: int, message: str = "처리 중...") -> None:
+        """determinate 모드로 프로그레스 바를 시작한다.
+
+        Args:
+            total: 전체 항목 수
+            message: 표시할 상태 메시지
+        """
+        self._state.start_determinate(total, message)
+        self.progress.configure(mode="determinate")
+        self.progress.set(0)
+        self.status_label.configure(text=message)
+        self.pack(fill="x", padx=PADDING_MD, pady=PADDING_MD)
+
+    def update_progress(self, current: int, total: int) -> None:
+        """determinate 모드에서 진행률을 갱신한다.
+
+        Args:
+            current: 현재 처리된 항목 수
+            total: 전체 항목 수
+        """
+        self._state.update_progress(current, total)
+        self.progress.set(self._state.fraction)
+        pct = int(self._state.fraction * 100)
+        self.status_label.configure(text=f"{self._state.message} ({pct}%)")
 
     def stop(self) -> None:
         """프로그레스 바를 정지한다."""
@@ -63,6 +89,7 @@ class ProgressBarWidget(ctk.CTkFrame):
         """프로그레스 바를 초기화한다."""
         self._state.reset()
         self.progress.stop()
+        self.progress.configure(mode="indeterminate")
         self.progress.set(0)
         self.status_label.configure(text="")
         self.pack_forget()

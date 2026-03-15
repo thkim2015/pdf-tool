@@ -5,6 +5,7 @@ from pathlib import Path
 from pypdf import PdfWriter
 
 from pdf_tool.core.pdf_handler import load_pdf
+from pdf_tool.core.progress import ProgressCallback, safe_callback
 from pdf_tool.core.validators import validate_output_path
 from pdf_tool.utils.file_utils import generate_output_filename
 
@@ -13,12 +14,14 @@ def compress_pdf(
     input_path: Path,
     *,
     output: Path | None = None,
+    callback: ProgressCallback = None,
 ) -> dict:
     """PDF 파일을 압축하여 파일 크기를 줄인다.
 
     Args:
         input_path: 입력 PDF 파일 경로
         output: 출력 파일 경로 (None이면 자동 생성)
+        callback: 진행 상황 콜백 (current, total)
 
     Returns:
         압축 결과 딕셔너리:
@@ -38,11 +41,13 @@ def compress_pdf(
 
     validate_output_path(output)
 
+    total_pages = len(reader.pages)
     writer = PdfWriter()
 
     # 모든 페이지 복사
-    for page in reader.pages:
+    for i, page in enumerate(reader.pages):
         writer.add_page(page)
+        safe_callback(callback, i + 1, total_pages)
 
     # 메타데이터 복사
     if reader.metadata:

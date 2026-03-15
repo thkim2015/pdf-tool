@@ -8,6 +8,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from pdf_tool.commands.watermark import watermark_pdf
+from pdf_tool.core.progress import ProgressCallback
 
 
 def run_watermark(
@@ -19,6 +20,7 @@ def run_watermark(
     rotation: float = 45.0,
     position: str = "center",
     pages: str | None = None,
+    callback: ProgressCallback = None,
 ) -> Path:
     """워터마크를 추가한다.
 
@@ -31,6 +33,7 @@ def run_watermark(
         rotation: 회전 각도 (0~360)
         position: 위치 (center 등)
         pages: 적용할 페이지 범위 (None이면 전체)
+        callback: 진행 상황 콜백
 
     Returns:
         생성된 출력 파일 경로
@@ -44,4 +47,5 @@ def run_watermark(
         rotation=rotation,
         position=position,
         pages=pages,
+        callback=callback,
     )

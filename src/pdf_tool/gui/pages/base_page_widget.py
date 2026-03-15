@@ -12,6 +12,7 @@ from pathlib import Path
 
 import customtkinter as ctk
 
+from pdf_tool.core.progress import ProgressCallback
 from pdf_tool.gui.app import format_exception_message
 from pdf_tool.gui.constants import (
     BORDER_RADIUS_DEFAULT,
@@ -263,20 +264,62 @@ class BasePageWidget(ctk.CTkFrame):
         self._execution_state.start(input_file)
         self.execute_btn.configure(state="disabled")  # REQ-S-001
         self.result_display.clear()
-        self.progress_bar.start("처리 중...")
+
+        # determinate 모드: 페이지 수를 알 수 있으면 사용
+        total_pages = self._get_total_pages(input_file)
+        if total_pages and total_pages > 0:
+            self.progress_bar.start_determinate(total_pages, "처리 중...")
+        else:
+            self.progress_bar.start("처리 중...")
+
+        callback = self._make_gui_callback()
 
         # 데몬 스레드에서 커맨드 실행
         thread = threading.Thread(
             target=self._execute_in_thread,
-            args=(input_file, output_path),
+            args=(input_file, output_path, callback),
             daemon=True,
         )
         thread.start()
 
-    def _execute_in_thread(self, input_file: Path, output_path: Path) -> None:
+    def _make_gui_callback(self) -> ProgressCallback:
+        """GUI 업데이트를 위한 progress callback을 생성한다.
+
+        Returns:
+            main thread에서 progress bar를 업데이트하는 콜백
+        """
+
+        def _callback(current: int, total: int) -> None:
+            self.after(0, lambda c=current, t=total: self.progress_bar.update_progress(c, t))
+
+        return _callback
+
+    def _get_total_pages(self, input_file: Path) -> int | None:
+        """입력 파일의 총 페이지 수를 반환한다.
+
+        Args:
+            input_file: 입력 PDF 파일 경로
+
+        Returns:
+            총 페이지 수. 알 수 없으면 None.
+        """
+        try:
+            from pypdf import PdfReader
+
+            reader = PdfReader(input_file)
+            return len(reader.pages)
+        except Exception:
+            return None
+
+    def _execute_in_thread(
+        self,
+        input_file: Path,
+        output_path: Path,
+        callback: ProgressCallback = None,
+    ) -> None:
         """백그라운드 스레드에서 커맨드를 실행한다."""
         try:
-            result = self.execute_command(input_file, output_path)
+            result = self.execute_command(input_file, output_path, callback=callback)
             self.after(0, lambda: self._on_success(result, output_path))
         except Exception as exc:
             self.after(0, lambda e=exc: self._on_error(e))
@@ -304,5 +347,16 @@ class BasePageWidget(ctk.CTkFrame):
         """파라미터 UI를 생성한다. 서브클래스에서 구현한다."""
 
     @abstractmethod
-    def execute_command(self, input_file: Path, output_path: Path):
-        """커맨드를 실행한다. 서브클래스에서 구현한다."""
+    def execute_command(
+        self,
+        input_file: Path,
+        output_path: Path,
+        callback: ProgressCallback = None,
+    ):
+        """커맨드를 실행한다. 서브클래스에서 구현한다.
+
+        Args:
+            input_file: 입력 PDF 파일 경로
+            output_path: 출력 PDF 파일 경로
+            callback: 진행 상황 콜백 (None이면 무시)
+        """
