@@ -25,8 +25,8 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra build --extra dev
 
-      - name: Run tests
-        run: uv run pytest tests/ -x -q --ignore=tests/test_gui_preview.py --ignore=tests/test_gui_error_log.py --ignore=tests/test_gui_app.py
+      - name: Run tests (CLI only, skip GUI tests)
+        run: uv run pytest tests/ -x -q --ignore-glob="tests/test_gui*.py"
 
       - name: Build CLI EXE
         run: uv run python build_exe.py --mode cli
