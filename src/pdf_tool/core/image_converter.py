@@ -103,11 +103,12 @@ def _add_image_to_pdf(
     Raises:
         PDFProcessingError: 이미지 추가 중 오류가 발생할 때
     """
+    import tempfile
     from io import BytesIO
 
-    from reportlab.lib.utils import ImageReader
     from reportlab.pdfgen import canvas
 
+    temp_file = None
     try:
         # 이미지 로드 및 변환
         with Image.open(image_path) as img:
@@ -134,17 +135,19 @@ def _add_image_to_pdf(
             else:
                 page_width, page_height = a4_width, a4_height
 
-            # ImageReader를 사용하여 tkinter PhotoImage 회피
-            img_reader = ImageReader(str(image_path))
+            # 이미지를 임시 JPEG 파일로 저장 (GUI 환경에서 캐시 방지)
+            with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+                temp_file = tmp.name
+                img.save(temp_file, "JPEG", quality=95)
 
             # 임시 PDF로 이미지 변환
             buffer = BytesIO()
             c = canvas.Canvas(buffer, pagesize=(page_width, page_height))
 
-            # reportlab의 drawImage 메서드 사용 (ImageReader 사용)
+            # 임시 파일 경로로 drawImage 호출
             if keep_aspect_ratio:
                 c.drawImage(
-                    img_reader,
+                    temp_file,
                     0,
                     0,
                     width=page_width,
@@ -153,7 +156,7 @@ def _add_image_to_pdf(
                 )
             else:
                 c.drawImage(
-                    img_reader,
+                    temp_file,
                     0,
                     0,
                     width=page_width,
@@ -171,6 +174,13 @@ def _add_image_to_pdf(
 
     except Exception as exc:
         raise PDFProcessingError(f"이미지 처리 중 오류 발생 ({image_path}): {exc}") from exc
+    finally:
+        # 임시 파일 정리
+        if temp_file and Path(temp_file).exists():
+            try:
+                Path(temp_file).unlink()
+            except Exception:
+                pass
 
 
 def _calculate_page_size(
