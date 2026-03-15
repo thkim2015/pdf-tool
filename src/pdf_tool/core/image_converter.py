@@ -1,6 +1,10 @@
 """Image to PDF 변환 기능: 이미지 파일을 PDF로 변환한다."""
 
+import os
 from pathlib import Path
+
+# GUI 환경에서 tkinter ImageTk 라이브러리 비활성화
+os.environ["PILLOW_DISABLE_TKINTER"] = "1"
 
 from PIL import Image
 from pypdf import PdfReader, PdfWriter
@@ -57,6 +61,8 @@ def image_to_pdf(
         FileValidationError: 이미지 파일이 유효하지 않을 때
         PDFProcessingError: PDF 생성 중 오류가 발생할 때
     """
+    import gc
+
     # 입력 경로 정규화
     if isinstance(image_paths, Path):
         image_paths = [image_paths]
