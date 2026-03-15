@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pdf-tool"
-version = "0.1.0"
+version = "0.2.1"
 description = "PDF 조작 도구 (Cut, Merge, Split, Rotate, Resize, Compress, Watermark, Info)"
 requires-python = ">=3.13"
 dependencies = [
@@ -44,6 +44,7 @@ gui = [
     "customtkinter>=5.2.0",
     "tkinterdnd2>=0.4.2",
     "pypdfium2>=4.0.0",
+    "darkdetect>=0.8.0",
 ]
 dev = [
     "pytest>=8.0.0",

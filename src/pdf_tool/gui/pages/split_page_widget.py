@@ -7,28 +7,27 @@ from pathlib import Path
 import customtkinter as ctk
 
 from pdf_tool.gui.constants import (
-    BORDER_RADIUS_DEFAULT,
-    BUTTON_HEIGHT_DEFAULT,
     FONT_LABEL,
     INPUT_HEIGHT_DEFAULT,
-    PADDING_LG,
     PADDING_MD,
     SECTION_LABEL_PADDING,
     SECTION_SPACING,
 )
-from pdf_tool.gui.theme import get_current_palette
-
 from pdf_tool.gui.pages.base_page_widget import BasePageWidget
 from pdf_tool.gui.pages.split_page import run_split
+from pdf_tool.gui.theme import get_current_palette
 
 
 class SplitPageWidget(BasePageWidget):
     """Split 페이지 위젯. N페이지 단위 분할 입력을 포함한다."""
 
+    page_title = "분할"
+    action_button_text = "분할"
+
     def create_params_ui(self, parent: ctk.CTkFrame) -> None:
         """분할 파라미터 UI를 생성한다."""
         palette = get_current_palette()
-        
+
         label = ctk.CTkLabel(
             parent,
             text="N페이지마다 분할:",

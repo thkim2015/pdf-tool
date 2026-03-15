@@ -1,6 +1,7 @@
 """Merge 페이지 GUI 위젯 모듈.
 
-FileList 위젯을 사용하여 BasePage 레이아웃을 오버라이드한다.
+FileList 위젯을 사용하여 다중 파일 병합을 지원한다.
+3단 레이아웃 (툴바, 컨텐츠, 액션바) 직접 구성.
 """
 
 from __future__ import annotations
@@ -14,13 +15,20 @@ import customtkinter as ctk
 from pdf_tool.gui.app import format_exception_message
 from pdf_tool.gui.constants import (
     BORDER_RADIUS_DEFAULT,
-    BUTTON_HEIGHT_DEFAULT,
-    PADDING_LG,
     PADDING_MD,
+)
+from pdf_tool.gui.pages.base_page_widget import (
+    ACTION_BAR_PADDING,
+    CONTENT_PADX,
+    CONTENT_TOP_MARGIN,
+    TOOLBAR_PADX,
+    get_action_bar_style,
+    get_toolbar_style,
 )
 from pdf_tool.gui.pages.merge_page import run_merge
 from pdf_tool.gui.theme import get_current_palette
 from pdf_tool.gui.widgets.file_list_widget import FileListWidget
+from pdf_tool.gui.widgets.macos_button import MacOSButtonStyle
 from pdf_tool.gui.widgets.progress_bar_widget import ProgressBarWidget
 from pdf_tool.gui.widgets.result_display_widget import ResultDisplayWidget
 
@@ -29,40 +37,108 @@ class MergePageWidget(ctk.CTkFrame):
     """Merge 페이지 위젯.
 
     단일 FilePicker 대신 FileList를 사용하여 다중 파일을 지원한다.
+    3단 레이아웃 (툴바, 컨텐츠, 액션바) 적용.
     """
 
     def __init__(self, master: ctk.CTkFrame, **kwargs) -> None:
         super().__init__(master, **kwargs)
 
         palette = get_current_palette()
+        toolbar_style = get_toolbar_style()
+        action_style = get_action_bar_style()
         self._is_executing = False
+
+        # ===== 상단: 툴바 =====
+        self.toolbar_frame = ctk.CTkFrame(
+            self,
+            height=toolbar_style["height"],
+            fg_color=palette.vibrancy_bg,
+            corner_radius=0,
+        )
+        self.toolbar_frame.pack(fill="x", side="top")
+        self.toolbar_frame.pack_propagate(False)
+
+        ctk.CTkLabel(
+            self.toolbar_frame,
+            text="병합",
+            text_color=palette.text_primary,
+            font=ctk.CTkFont(
+                "System",
+                toolbar_style["title_font_size"],
+                toolbar_style["title_weight"],
+            ),
+        ).pack(side="left", padx=TOOLBAR_PADX)
+
+        # ===== 하단: 액션 바 =====
+        self.action_bar_frame = ctk.CTkFrame(
+            self,
+            height=action_style["height"],
+            fg_color=palette.surface,
+            corner_radius=0,
+        )
+        self.action_bar_frame.pack(fill="x", side="bottom")
+        self.action_bar_frame.pack_propagate(False)
+
+        # 분리선
+        ctk.CTkFrame(
+            self.action_bar_frame,
+            height=action_style["separator_height"],
+            fg_color=action_style["separator_color"],
+            corner_radius=0,
+        ).pack(fill="x", side="top")
+
+        # 병합 버튼
+        button_style = MacOSButtonStyle.get_style("primary", "large")
+        hover_color = MacOSButtonStyle.get_hover_color("primary")
+
+        button_container = ctk.CTkFrame(
+            self.action_bar_frame,
+            fg_color="transparent",
+        )
+        button_container.pack(fill="both", expand=True, padx=CONTENT_PADX, pady=ACTION_BAR_PADDING)
+
+        self.execute_btn = ctk.CTkButton(
+            button_container,
+            text="병합",
+            command=self._on_execute,
+            state="disabled",
+            height=action_style["button_height"],
+            corner_radius=BORDER_RADIUS_DEFAULT,
+            fg_color=button_style["bg_color"],
+            text_color=button_style["text_color"],
+            hover_color=hover_color,
+        )
+        self.execute_btn.pack(side="right")
+
+        # ===== 중앙: 컨텐츠 =====
+        self.content_frame = ctk.CTkScrollableFrame(
+            self,
+            fg_color=palette.surface,
+        )
+        self.content_frame.pack(fill="both", expand=True)
 
         # 파일 목록
         self.file_list = FileListWidget(
-            self,
+            self.content_frame,
             on_list_changed=self._on_list_changed,
         )
-        self.file_list.pack(fill="both", expand=True, padx=PADDING_MD, pady=PADDING_MD)
-
-        # 실행 버튼
-        self.execute_btn = ctk.CTkButton(
-            self,
-            text="✨ 병합 실행",
-            command=self._on_execute,
-            state="disabled",
-            height=BUTTON_HEIGHT_DEFAULT,
-            corner_radius=BORDER_RADIUS_DEFAULT,
-            fg_color=palette.primary,
-            hover_color=palette.button_hover,
+        self.file_list.pack(
+            fill="both",
+            expand=True,
+            padx=CONTENT_PADX,
+            pady=(CONTENT_TOP_MARGIN, PADDING_MD),
         )
-        self.execute_btn.pack(pady=PADDING_LG, padx=PADDING_MD, fill="x")
 
         # 프로그레스 바
-        self.progress_bar = ProgressBarWidget(self)
+        self.progress_bar = ProgressBarWidget(self.content_frame)
 
         # 결과 표시
-        self.result_display = ResultDisplayWidget(self)
-        self.result_display.pack(fill="x", padx=PADDING_MD, pady=PADDING_MD)
+        self.result_display = ResultDisplayWidget(self.content_frame)
+        self.result_display.pack(
+            fill="x",
+            padx=CONTENT_PADX,
+            pady=PADDING_MD,
+        )
 
     def _on_list_changed(self) -> None:
         """파일 목록이 변경되면 실행 버튼 상태를 갱신한다."""

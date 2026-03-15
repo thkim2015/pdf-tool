@@ -1,6 +1,7 @@
 """PDF 미리보기 GUI 위젯 모듈.
 
 결과 PDF의 첫 번째 페이지를 썸네일로 표시한다.
+Quick Look 스타일 (둥근 모서리, 그림자) 적용.
 """
 
 from __future__ import annotations
@@ -21,6 +22,25 @@ except ImportError:
     _preview_module_available = False
 
 
+# ============================================================================
+# Quick Look 스타일 상수
+# ============================================================================
+
+QUICK_LOOK_CORNER_RADIUS = 8
+
+
+def get_quick_look_style() -> dict:
+    """Quick Look 스타일 딕셔너리를 반환한다.
+
+    Returns:
+        corner_radius, shadow 키를 포함하는 딕셔너리
+    """
+    return {
+        "corner_radius": QUICK_LOOK_CORNER_RADIUS,
+        "shadow": "light",
+    }
+
+
 class PdfPreviewWidget(ctk.CTkFrame):
     """PDF 첫 페이지 미리보기 위젯.
 
@@ -28,6 +48,9 @@ class PdfPreviewWidget(ctk.CTkFrame):
     """
 
     def __init__(self, master: ctk.CTkFrame, **kwargs) -> None:
+        # Quick Look 스타일 적용
+        quick_look = get_quick_look_style()
+        kwargs.setdefault("corner_radius", quick_look["corner_radius"])
         super().__init__(master, **kwargs)
 
         palette = get_current_palette()

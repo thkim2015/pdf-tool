@@ -7,28 +7,28 @@ from pathlib import Path
 import customtkinter as ctk
 
 from pdf_tool.gui.constants import (
-    BORDER_RADIUS_DEFAULT,
     FONT_LABEL,
     OPTIONMENU_HEIGHT_DEFAULT,
-    PADDING_LG,
     PADDING_MD,
     SECTION_LABEL_PADDING,
     SECTION_SPACING,
 )
-from pdf_tool.gui.theme import get_current_palette
-
 from pdf_tool.gui.pages.base_page_widget import BasePageWidget
 from pdf_tool.gui.pages.rotate_page import run_rotate
+from pdf_tool.gui.theme import get_current_palette
 from pdf_tool.gui.widgets.page_range_input_widget import PageRangeInputWidget
 
 
 class RotatePageWidget(BasePageWidget):
     """Rotate 페이지 위젯. 각도 선택과 선택적 페이지 범위를 포함한다."""
 
+    page_title = "회전"
+    action_button_text = "회전"
+
     def create_params_ui(self, parent: ctk.CTkFrame) -> None:
         """회전 파라미터 UI를 생성한다."""
         palette = get_current_palette()
-        
+
         # 각도 선택
         angle_label = ctk.CTkLabel(
             parent,

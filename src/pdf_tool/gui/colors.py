@@ -1,6 +1,6 @@
 """GUI 색상 팔레트 정의 모듈.
 
-다크모드/라이트모드 색상 체계를 일관되게 정의한다.
+Apple Human Interface Guidelines 기반 다크모드/라이트모드 색상 체계를 정의한다.
 """
 
 from __future__ import annotations
@@ -10,28 +10,31 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True)
 class ColorPalette:
-    """색상 팔레트."""
+    """색상 팔레트.
+
+    Apple HIG 시스템 색상 기반으로 정의한다.
+    """
 
     # 기본 색상
-    primary: str          # 주요 액션 (버튼, 링크)
+    primary: str          # 주요 액션 (버튼, 링크) - Apple Blue
     secondary: str        # 보조 액션
     accent: str           # 강조 (하이라이트)
 
     # 배경색
-    background: str       # 앱 배경
-    surface: str          # 카드, 패널 배경
-    surface_elevated: str # 상승된 표면
+    background: str       # 앱 배경 (Apple systemBackground)
+    surface: str          # 카드, 패널 배경 (Apple secondarySystemBackground)
+    surface_elevated: str # 상승된 표면 (Apple tertiarySystemBackground)
 
     # 텍스트 색상
     text_primary: str     # 주 텍스트
     text_secondary: str   # 보조 텍스트
     text_tertiary: str    # 터셔리 텍스트 (매우 연한)
 
-    # 상태 색상
-    success: str          # 성공 (초록)
-    warning: str          # 경고 (주황)
-    error: str            # 에러 (빨강)
-    info: str             # 정보 (파랑)
+    # 상태 색상 (Apple 액센트 컬러)
+    success: str          # 성공 - Apple Green
+    warning: str          # 경고 - Apple Orange
+    error: str            # 에러 - Apple Red
+    info: str             # 정보 - Apple Blue
 
     # 테두리/구분선
     border: str           # 테두리
@@ -42,71 +45,95 @@ class ColorPalette:
     button_active: str    # 버튼 active/pressed
     button_disabled: str  # 버튼 disabled
 
+    # 사이드바 (macOS 스타일)
+    sidebar_bg: str       # 사이드바 배경
+    sidebar_hover: str    # 사이드바 항목 호버
+    sidebar_selected: str # 사이드바 항목 선택
 
-# 다크모드 팔레트 (기본값)
+    # vibrancy (투명도 시뮬레이션)
+    vibrancy_bg: str      # vibrancy 배경
+
+
+# 다크모드 팔레트 (Apple HIG 기반)
 DARK_PALETTE = ColorPalette(
-    # 기본 색상 - Blue-Purple 체계
-    primary="#3b82f6",        # Bright Blue
-    secondary="#8b5cf6",      # Purple
-    accent="#ec4899",         # Pink/Magenta
+    # 기본 색상 - Apple 시스템 색상
+    primary="#007AFF",        # Apple Blue
+    secondary="#5856D6",      # Apple Purple
+    accent="#FF2D55",         # Apple Pink
 
-    # 배경색
-    background="#0f172a",     # Navy Black (매우 어두운 파랑)
-    surface="#1e293b",        # Dark Slate (어두운 회색-파랑)
-    surface_elevated="#334155", # Slate (중간 회색-파랑)
+    # 배경색 - Apple 다크 모드 시스템 배경
+    background="#1C1C1E",     # systemBackground (다크)
+    surface="#2C2C2E",        # secondarySystemBackground (다크)
+    surface_elevated="#3A3A3C",  # tertiarySystemBackground (다크)
 
     # 텍스트 색상
-    text_primary="#f1f5f9",   # Light Slate (거의 흰색)
-    text_secondary="#cbd5e1", # Medium Slate (밝은 회색)
-    text_tertiary="#94a3b8",  # Dim Slate (중간 회색)
+    text_primary="#FFFFFF",   # label (다크)
+    text_secondary="#EBEBF5",  # secondaryLabel (다크, 60% opacity 시뮬레이션)
+    text_tertiary="#EBEBF5",  # tertiaryLabel (다크, 30% opacity 시뮬레이션)
 
-    # 상태 색상
-    success="#10b981",        # Emerald (초록)
-    warning="#f59e0b",        # Amber (주황)
-    error="#ef4444",          # Red (빨강)
-    info="#06b6d4",           # Cyan (시안)
+    # 상태 색상 - Apple 액센트 컬러
+    success="#34C759",        # Apple Green
+    warning="#FF9500",        # Apple Orange
+    error="#FF3B30",          # Apple Red
+    info="#007AFF",           # Apple Blue
 
     # 테두리/구분선
-    border="#334155",         # Slate
-    divider="#475569",        # Darker Slate
+    border="#38383A",         # separator (다크)
+    divider="#48484A",        # opaqueSeparator (다크)
 
     # 버튼 상태
-    button_hover="#4f46e5",   # Indigo (Blue보다 진함)
-    button_active="#4338ca",  # Indigo (더 진함)
-    button_disabled="#475569", # Slate (비활성)
+    button_hover="#0A84FF",   # Apple Blue (밝은 변형)
+    button_active="#0071E3",  # Apple Blue (어두운 변형)
+    button_disabled="#48484A",  # quaternaryLabel (다크)
+
+    # 사이드바
+    sidebar_bg="#1C1C1E",     # 사이드바 배경 (다크)
+    sidebar_hover="#2C2C2E",  # 사이드바 호버
+    sidebar_selected="#0A84FF",  # 사이드바 선택 (Apple Blue)
+
+    # vibrancy
+    vibrancy_bg="#1C1C1ECC",  # 80% 불투명도 시뮬레이션
 )
 
-# 라이트모드 팔레트
+# 라이트모드 팔레트 (Apple HIG 기반)
 LIGHT_PALETTE = ColorPalette(
-    # 기본 색상
-    primary="#2563eb",        # Deep Blue
-    secondary="#7c3aed",      # Deep Purple
-    accent="#db2777",         # Deep Pink
+    # 기본 색상 - Apple 시스템 색상
+    primary="#007AFF",        # Apple Blue
+    secondary="#5856D6",      # Apple Purple
+    accent="#FF2D55",         # Apple Pink
 
-    # 배경색
-    background="#f8fafc",     # Very Light Slate
-    surface="#ffffff",        # White
-    surface_elevated="#f1f5f9", # Light Slate
+    # 배경색 - Apple 라이트 모드 시스템 배경
+    background="#F2F2F7",     # systemBackground (라이트)
+    surface="#FFFFFF",        # secondarySystemBackground (라이트)
+    surface_elevated="#F2F2F7",  # tertiarySystemBackground (라이트)
 
     # 텍스트 색상
-    text_primary="#0f172a",   # Navy Black
-    text_secondary="#475569", # Slate
-    text_tertiary="#94a3b8",  # Dim Slate
+    text_primary="#000000",   # label (라이트)
+    text_secondary="#3C3C43",  # secondaryLabel (라이트, 60% opacity 시뮬레이션)
+    text_tertiary="#3C3C43",  # tertiaryLabel (라이트, 30% opacity 시뮬레이션)
 
-    # 상태 색상
-    success="#059669",        # Deep Emerald
-    warning="#d97706",        # Deep Amber
-    error="#dc2626",          # Deep Red
-    info="#0891b2",           # Deep Cyan
+    # 상태 색상 - Apple 액센트 컬러
+    success="#34C759",        # Apple Green
+    warning="#FF9500",        # Apple Orange
+    error="#FF3B30",          # Apple Red
+    info="#007AFF",           # Apple Blue
 
     # 테두리/구분선
-    border="#e2e8f0",         # Light Gray
-    divider="#cbd5e1",        # Medium Light Gray
+    border="#C6C6C8",         # separator (라이트)
+    divider="#D1D1D6",        # opaqueSeparator (라이트)
 
     # 버튼 상태
-    button_hover="#1d4ed8",   # Deeper Blue
-    button_active="#1e40af",  # Very Deep Blue
-    button_disabled="#cbd5e1", # Light Gray
+    button_hover="#0A84FF",   # Apple Blue (밝은 변형)
+    button_active="#0071E3",  # Apple Blue (어두운 변형)
+    button_disabled="#D1D1D6",  # quaternaryLabel (라이트)
+
+    # 사이드바
+    sidebar_bg="#F2F2F7",     # 사이드바 배경 (라이트)
+    sidebar_hover="#E5E5EA",  # 사이드바 호버
+    sidebar_selected="#007AFF",  # 사이드바 선택 (Apple Blue)
+
+    # vibrancy
+    vibrancy_bg="#F2F2F7CC",  # 80% 불투명도 시뮬레이션
 )
 
 

@@ -14,6 +14,9 @@ from pdf_tool.gui.widgets.page_range_input_widget import PageRangeInputWidget
 class CutPageWidget(BasePageWidget):
     """Cut 페이지 위젯. 페이지 범위 입력을 포함한다."""
 
+    page_title = "자르기"
+    action_button_text = "자르기"
+
     def create_params_ui(self, parent: ctk.CTkFrame) -> None:
         """페이지 범위 입력 UI를 생성한다."""
         self.page_range_input = PageRangeInputWidget(parent)

@@ -15,7 +15,6 @@ import customtkinter as ctk
 from pdf_tool.gui.constants import (
     BORDER_RADIUS_DEFAULT,
     BUTTON_HEIGHT_DEFAULT,
-    FONT_LABEL,
     FONT_SMALL,
     PADDING_MD,
 )
